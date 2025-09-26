@@ -330,7 +330,7 @@
         const ingredients = Array.isArray(meta.ingredients)
           ? meta.ingredients
           : [];
-        const steps = Array.isArray(meta.steps) ? meta.steps : []; // dùng 'steps'
+        const step = Array.isArray(meta.step) ? meta.step : [];
 
         box.innerHTML = `
       <div class="metaCard">
@@ -343,7 +343,7 @@
           </div>
           <div>
             <h3>Cách nấu</h3>
-            <ol>${steps.map((x) => `<li>${x}</li>`).join("")}</ol>
+            <ol>${step.map((x) => `<li>${x}</li>`).join("")}</ol>
           </div>
         </div>
       </div>

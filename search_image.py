@@ -1,105 +1,123 @@
 import os
 import io
+import json
 import pickle
+from pathlib import Path
+
 import numpy as np
 from PIL import Image
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from tensorflow.keras.applications.efficientnet import EfficientNetB0, preprocess_input
 from tensorflow.keras.preprocessing import image
-import json
-from pathlib import Path
 
-
-# Khởi tạo Flask app sớm
-app = Flask(__name__, static_folder="dataset", static_url_path="/dataset")
+# Flask App
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
-# Load model
+
+
+# (Tuỳ chọn) phục vụ trang static làm homepage
+@app.route("/")
+def home():
+    return send_from_directory(app.static_folder, "index.html")
+
+
+# Phục vụ ảnh trong thư mục dataset/
+@app.route("/dataset/<path:filename>")
+def serve_dataset_image(filename):
+    return send_from_directory("dataset", filename)
+
+
+# Model & Data
+# Tải model EfficientNetB0 (RGB 3 kênh)
 model = EfficientNetB0(
     weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3)
 )
 
-# Load vector và path ảnh đã lưu
-vectors = pickle.load(open("vectors.pkl", "rb"))
-paths = pickle.load(open("paths.pkl", "rb"))
-vectors = np.array(vectors)
+# Load vectors & paths
+with open("vectors.pkl", "rb") as f:
+    vectors = pickle.load(f)
+with open("paths.pkl", "rb") as f:
+    paths = pickle.load(f)
+
+vectors = np.asarray(vectors, dtype=np.float32)
+if vectors.ndim != 2:
+    raise RuntimeError("vectors.pkl không đúng dạng (N, D).")
 
 
-# Tiền xử lý ảnh
-def image_preprocessing(file_bytes):
+# Helpers
+def image_preprocessing(file_bytes: bytes) -> np.ndarray:
+    """Đổi ảnh bytes -> tensor 4D (1, 224, 224, 3) + preprocess EfficientNet."""
     img = Image.open(io.BytesIO(file_bytes)).convert("RGB").resize((224, 224))
     x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
+    x = np.expand_dims(x, axis=0).astype("float32")
     x = preprocess_input(x)
     return x
 
 
-# Trích xuất vector đặc trưng
-def extract_vector(img_bytes):
+def extract_vector(img_bytes: bytes) -> np.ndarray:
+    """Trích đặc trưng + chuẩn hoá L2 (có eps)."""
     tensor = image_preprocessing(img_bytes)
-    vector = model.predict(tensor)[0]
-    return vector / np.linalg.norm(vector)
+    vec = model.predict(tensor, verbose=0)[0]
+    norm = np.linalg.norm(vec)
+    if norm < 1e-12:
+        return vec.astype("float32")
+    return (vec / norm).astype("float32")
 
 
-# Route tìm kiếm
-@app.route("/search", methods=["POST"])
-def search():
-    if "image" not in request.files:
-        return jsonify({"error": "no image uploaded"}), 400
-
-    file = request.files["image"]
-    filename = file.filename.lower().strip()
-    valid_ext = (".jpg", ".jpeg", ".png", ".bmp", ".webp")
-
-    if not filename.endswith(valid_ext):
-        return jsonify({"error": "invalid image file type"}), 400
-
-    img_bytes = file.read()
-
-    try:
-        query_vector = extract_vector(img_bytes)
-        distances = np.linalg.norm(vectors - query_vector, axis=1)
-        ids = np.argsort(distances)[:24]
-
-        results = [
-            {
-                "path": paths[i],
-                "distance": float(distances[i]),
-            }
-            for i in ids
-        ]
-        best_meta = lookup_dish_meta(paths[ids[0]])
-        return jsonify(
-            {
-                "meta": best_meta,
-                "results": results,
-            }
-        )
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
+# Metadata
 BASE_DIR = Path(__file__).resolve().parent
 METADATA_PATH = BASE_DIR / "metadata.json"
-
-# load metadata
 with open(METADATA_PATH, "r", encoding="utf-8") as f:
     DISH_METADATA = json.load(f)
 
 
 def lookup_dish_meta(rel_path: str) -> dict:
+    """Lấy metadata theo dish_id (folder gốc). Dùng 'steps' (số nhiều)."""
     dish_id = rel_path.split("/", 1)[0]
     meta = DISH_METADATA.get(dish_id, {})
     return {
         "dish_id": dish_id,
         "name": meta.get("name"),
         "intro": meta.get("intro", "Chưa có mô tả."),
-        "ingredients": meta.get("ingredients", "unknown"),
-        "step": meta.get("step", "unknown"),
+        "ingredients": meta.get("ingredients", []),
+        "steps": meta.get("steps", []),  # <- dùng 'steps' thay vì 'step'
     }
 
 
-# Chạy server
+# API
+@app.route("/search", methods=["POST"])
+def search():
+    if "image" not in request.files:
+        return jsonify({"error": "no image uploaded"}), 400
+
+    file = request.files["image"]
+    filename = (file.filename or "").lower().strip()
+    valid_ext = (".jpg", ".jpeg", ".png", ".bmp", ".webp")
+    if not filename.endswith(valid_ext):
+        return jsonify({"error": "invalid image file type"}), 400
+
+    img_bytes = file.read()
+    if not img_bytes:
+        return jsonify({"error": "empty file"}), 400
+
+    try:
+        query_vector = extract_vector(img_bytes)
+        # Euclidean distance
+        distances = np.linalg.norm(vectors - query_vector, axis=1)
+        K = 24
+        ids = np.argsort(distances)[:K]
+
+        results = [{"path": paths[i], "distance": float(distances[i])} for i in ids]
+
+        best_meta = lookup_dish_meta(paths[ids[0]]) if len(ids) > 0 else None
+        return jsonify({"meta": best_meta, "results": results})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Run (local)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, threaded=True, use_reloader=False)
+    # Render sẽ đặt biến PORT; local mặc định 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, threaded=True, use_reloader=False)

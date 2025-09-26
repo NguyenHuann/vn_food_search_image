@@ -290,14 +290,13 @@
 
     <!-- App JS -->
     <script>
-      // CẤU HÌNH BACKEND
-      const DEFAULT_BACKEND = "http://127.0.0.1:5000";
+      // CẤU HÌNH BACKEND (Render)
+      const DEFAULT_BACKEND = "https://vn-food-search-image.onrender.com";
       const urlParams = new URLSearchParams(location.search);
       const BASE_URL = urlParams.get("backend") || DEFAULT_BACKEND;
 
-      // DOM helpers
+      // DOM
       const $ = (q) => document.querySelector(q);
-
       const elFile = $("#file");
       const elDrop = $("#drop");
       const elPrev = $("#preview");
@@ -309,8 +308,6 @@
       const elLoading = $("#loading");
       const elErr = $("#err");
       const elBackend = $("#backend");
-
-      // container gồm upload + preview + controls
       const elTrainingInterface = document.querySelector(".training-interface");
 
       elBackend.textContent = BASE_URL || "(same origin)";
@@ -318,9 +315,42 @@
 
       const setLoading = (b) => (elLoading.style.display = b ? "flex" : "none");
       const setError = (msg) => (elErr.textContent = msg || "");
-
       const makeImgUrl = (relPath) => `${BASE_URL}/dataset/${relPath}`;
 
+      // RENDER META (TOP-1)
+      function renderMeta(meta) {
+        const box = document.querySelector("#metaBox");
+        if (!meta) {
+          box.innerHTML = "";
+          return;
+        }
+
+        const name = meta.name || meta.dish_id || "Món ăn";
+        const intro = meta.intro || "";
+        const ingredients = Array.isArray(meta.ingredients)
+          ? meta.ingredients
+          : [];
+        const steps = Array.isArray(meta.steps) ? meta.steps : []; // dùng 'steps'
+
+        box.innerHTML = `
+      <div class="metaCard">
+        <h2 class="metaTitle">${name}</h2>
+        <p class="metaIntro">${intro}</p>
+        <div class="metaCols">
+          <div>
+            <h3>Nguyên liệu</h3>
+            <ul>${ingredients.map((x) => `<li>${x}</li>`).join("")}</ul>
+          </div>
+          <div>
+            <h3>Cách nấu</h3>
+            <ol>${steps.map((x) => `<li>${x}</li>`).join("")}</ol>
+          </div>
+        </div>
+      </div>
+    `;
+      }
+
+      // RENDER KẾT QUẢ ẢNH
       function renderResults(items) {
         elResults.innerHTML = "";
         if (!items || !items.length) return;
@@ -330,15 +360,15 @@
           const tile = document.createElement("div");
           tile.className = "tile";
           tile.innerHTML = `
-            <span class="badge">#${idx + 1} · ${score}</span>
-            <img alt="result ${idx + 1}" loading="lazy"/>
-            <div class="meta">
-              <span title="${it.path}">${it.path
+        <span class="badge">#${idx + 1} · ${score}</span>
+        <img alt="result ${idx + 1}" loading="lazy"/>
+        <div class="meta">
+          <span title="${it.path}">${it.path
             .split("/")
             .slice(-2)
             .join("/")}</span>
-              <a href="${url}" target="_blank" rel="noreferrer">Mở</a>
-            </div>`;
+          <a href="${url}" target="_blank" rel="noreferrer">Mở</a>
+        </div>`;
           const img = tile.querySelector("img");
           img.src = url;
           img.addEventListener("error", () => {
@@ -354,6 +384,7 @@
         });
       }
 
+      // PREVIEW + PICK/DROP
       function showPreview(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -362,7 +393,6 @@
         };
         reader.readAsDataURL(file);
       }
-
       function validateAndEnable(file) {
         if (!file) return;
         if (!/\.(jpg|jpeg|png|bmp|webp)$/i.test(file.name)) {
@@ -376,14 +406,11 @@
         elBtnSearch.disabled = false;
       }
 
-      // Sự kiện: pick / drop / clear
       elBtnPick.addEventListener("click", () => elFile.click());
-
       elFile.addEventListener("change", () => {
         setError("");
         validateAndEnable(elFile.files?.[0]);
       });
-
       ["dragenter", "dragover"].forEach((ev) =>
         elDrop.addEventListener(ev, (e) => {
           e.preventDefault();
@@ -413,14 +440,14 @@
         elPrev.style.display = "none";
         elBtnSearch.disabled = true;
         elResults.innerHTML = "";
-        // hiện lại giao diện upload nếu trước đó đã ẩn
+        renderMeta(null);
         elTrainingInterface.style.display = "";
         document
           .querySelector(".training-section")
           ?.scrollIntoView({ behavior: "smooth" });
       });
 
-      // Gửi ảnh tới API /search
+      // GỬI ẢNH TỚI /search
       elBtnSearch.addEventListener("click", async () => {
         if (!fileBlob) return;
         setError("");
@@ -439,49 +466,15 @@
             const text = await resp.text();
             throw new Error(`HTTP ${resp.status}: ${text}`);
           }
-
           const data = await resp.json();
-          if (!Array.isArray(data.results)) {
-            throw new Error("Phản hồi không đúng định dạng { meta, results}.");
+          if (!data || !Array.isArray(data.results)) {
+            throw new Error("Phản hồi không đúng định dạng { meta, results }.");
           }
-          // Ẩn khung upload để nhường chỗ cho kết quả
+
+          // Ẩn khu upload, render meta + kết quả
           elTrainingInterface.style.display = "none";
           renderMeta(data.meta);
           renderResults(data.results);
-
-          function renderMeta(meta) {
-            const box = document.querySelector("#metaBox");
-            if (!meta) {
-              box.innerHTML = "";
-              return;
-            }
-
-            const name = meta.name || meta.dish_id || "Món ăn";
-            const intro = meta.intro || "";
-            const ingredients = Array.isArray(meta.ingredients)
-              ? meta.ingredients
-              : [];
-            const step = Array.isArray(meta.step) ? meta.step : [];
-
-            box.innerHTML = `
-              <div class="metaCard">
-                <h2 class="metaTitle">${name}</h2>
-                <p class="metaIntro">${intro}</p>
-                <div class="metaCols">
-                  <div>
-                    <h3>Nguyên liệu</h3>
-                    <ul>${ingredients.map((x) => `<li>${x}</li>`).join("")}</ul>
-                  </div>
-                  <div>
-                    <h3>Cách nấu</h3>
-                    <ol>${step.map((x) => `<li>${x}</li>`).join("")}</ol>
-                  </div>
-                </div>
-              </div>
-            `;
-          }
-
-          // Cuộn xuống kết quả cho mượt
           document
             .querySelector(".results-section")
             ?.scrollIntoView({ behavior: "smooth" });
@@ -493,18 +486,6 @@
           elBtnSearch.disabled = false;
         }
       });
-
-      const meta = data.meta;
-      document.querySelector("#meta").innerHTML = `
-        <h2>${meta.name}</h2>
-        <p>${meta.intro}</p>
-        <br><b>Nguyên liệu:</b><br>${meta.ingredients
-          .map((x) => `• ${x}`)
-          .join("<br>")}
-        <br><b>Cách nấu:</b><br>${meta.step
-          .map((x, i) => `${i + 1}. ${x}`)
-          .join("<br>")}
-        `;
     </script>
   </body>
 </html>

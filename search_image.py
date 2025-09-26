@@ -47,7 +47,6 @@ if vectors.ndim != 2:
 
 # Helpers
 def image_preprocessing(file_bytes: bytes) -> np.ndarray:
-    """Đổi ảnh bytes -> tensor 4D (1, 224, 224, 3) + preprocess EfficientNet."""
     img = Image.open(io.BytesIO(file_bytes)).convert("RGB").resize((224, 224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0).astype("float32")
@@ -73,7 +72,6 @@ with open(METADATA_PATH, "r", encoding="utf-8") as f:
 
 
 def lookup_dish_meta(rel_path: str) -> dict:
-    """Lấy metadata theo dish_id (folder gốc). Dùng 'steps' (số nhiều)."""
     dish_id = rel_path.split("/", 1)[0]
     meta = DISH_METADATA.get(dish_id, {})
     return {
@@ -81,7 +79,7 @@ def lookup_dish_meta(rel_path: str) -> dict:
         "name": meta.get("name"),
         "intro": meta.get("intro", "Chưa có mô tả."),
         "ingredients": meta.get("ingredients", []),
-        "steps": meta.get("steps", []),  # <- dùng 'steps' thay vì 'step'
+        "step": meta.get("step", []),
     }
 
 

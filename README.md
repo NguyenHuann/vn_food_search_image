@@ -9,4 +9,4 @@
 
 ---
 ## Dataset
-![Kaggle}(https://www.kaggle.com/datasets/nguyenhuann/vietnamese-food-image-dataset)
+![Kaggle](https://www.kaggle.com/datasets/nguyenhuann/vietnamese-food-image-dataset)

@@ -103,7 +103,7 @@ def search():
         query_vector = extract_vector(img_bytes)
         # Euclidean distance
         distances = np.linalg.norm(vectors - query_vector, axis=1)
-        K = 24
+        K = 50
         ids = np.argsort(distances)[:K]
 
         results = [{"path": paths[i], "distance": float(distances[i])} for i in ids]

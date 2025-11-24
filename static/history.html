@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử - Image Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header"></div>
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h2>Lịch Sử Tìm Kiếm</h2>
+                <p>Theo dõi và quản lý lịch sử tìm kiếm hình ảnh của bạn</p>
+            </div>
+
+            <!-- History Controls -->
+            <div class="history-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchHistory" placeholder="Tìm kiếm trong lịch sử...">
+                </div>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">Tất cả</button>
+                    <button class="filter-btn" data-filter="today">Hôm nay</button>
+                    <button class="filter-btn" data-filter="week">Tuần này</button>
+                    <button class="filter-btn" data-filter="month">Tháng này</button>
+                </div>
+                <button class="clear-history" id="clearAllHistory">
+                    <i class="fas fa-trash"></i> Xóa tất cả
+                </button>
+            </div>
+
+            <!-- History Stats -->
+            <div class="history-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="stat-value" id="totalSearches">0</div>
+                    <div class="stat-label">Lần tìm kiếm</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="stat-value" id="totalImages">0</div>
+                    <div class="stat-label">Ảnh đã tìm</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-value" id="activeDays">0</div>
+                    <div class="stat-label">Ngày hoạt động</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-value" id="successRate">0%</div>
+                    <div class="stat-label">Tỷ lệ thành công</div>
+                </div>
+            </div>
+
+            <!-- History List -->
+            <div class="history-list" id="historyList">
+                <!-- History items will be populated by JavaScript -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+    <div id="footer"></div>
+    <script>
+        // History Management System
+        class HistoryManager {
+            constructor() {
+                this.history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+                this.currentPage = 1;
+                this.itemsPerPage = 5;
+                this.currentFilter = 'all';
+                this.searchTerm = '';
+            }
+
+            // Lưu kết quả tìm kiếm từ trang model
+            saveSearchResult(queryImage, results, metadata = {}) {
+                const searchRecord = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    queryImage: queryImage, // Base64 or URL
+                    results: results.slice(0, 5), // Top 5 results for preview
+                    totalResults: results.length,
+                    metadata: metadata,
+                    accuracy: Math.random() * 10 + 85 // Simulated accuracy
+                };
+
+                this.history.unshift(searchRecord);
+                this.saveToStorage();
+                this.updateStats();
+            }
+
+            // Lấy lịch sử với filter và pagination
+            getFilteredHistory() {
+                let filtered = this.history;
+
+                // Apply time filter
+                const now = new Date();
+                switch (this.currentFilter) {
+                    case 'today':
+                        filtered = filtered.filter(item => {
+                            const itemDate = new Date(item.timestamp);
+                            return itemDate.toDateString() === now.toDateString();
+                        });
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        filtered = filtered.filter(item => new Date(item.timestamp) >= weekAgo);
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        filtered = filtered.filter(item => new Date(item.timestamp) >= monthAgo);
+                        break;
+                }
+
+                // Apply search filter
+                if (this.searchTerm) {
+                    filtered = filtered.filter(item => 
+                        item.metadata.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                        item.metadata.intro?.toLowerCase().includes(this.searchTerm.toLowerCase())
+                    );
+                }
+
+                return filtered;
+            }
+
+            // Xóa mục lịch sử
+            deleteHistoryItem(id) {
+                this.history = this.history.filter(item => item.id !== id);
+                this.saveToStorage();
+                this.updateStats();
+                this.renderHistory();
+            }
+
+            // Xóa toàn bộ lịch sử
+            clearAllHistory() {
+                if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử tìm kiếm?')) {
+                    this.history = [];
+                    this.saveToStorage();
+                    this.updateStats();
+                    this.renderHistory();
+                }
+            }
+
+            // Lưu vào localStorage
+            saveToStorage() {
+                localStorage.setItem('searchHistory', JSON.stringify(this.history));
+            }
+
+            // Cập nhật thống kê
+            updateStats() {
+                document.getElementById('totalSearches').textContent = this.history.length;
+                document.getElementById('totalImages').textContent = this.history.reduce((sum, item) => sum + item.totalResults, 0);
+                
+                // Tính số ngày hoạt động
+                const uniqueDays = new Set(this.history.map(item => 
+                    new Date(item.timestamp).toDateString()
+                )).size;
+                document.getElementById('activeDays').textContent = uniqueDays;
+
+                // Tính tỷ lệ thành công (giả lập)
+                const successRate = this.history.length > 0 ? 
+                    Math.round((this.history.filter(item => item.accuracy > 80).length / this.history.length) * 100) : 0;
+                document.getElementById('successRate').textContent = successRate + '%';
+            }
+
+            // Render lịch sử
+            renderHistory() {
+                const container = document.getElementById('historyList');
+                const filteredHistory = this.getFilteredHistory();
+                const totalPages = Math.ceil(filteredHistory.length / this.itemsPerPage);
+                
+                // Calculate pagination
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                const pageItems = filteredHistory.slice(startIndex, endIndex);
+
+                if (pageItems.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Chưa có lịch sử tìm kiếm</h3>
+                            <p>Hãy thử nghiệm tính năng tìm kiếm trên trang Mô hình</p>
+                        </div>
+                    `;
+                    document.getElementById('pagination').innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = pageItems.map(item => `
+                    <div class="history-item">
+                        <div class="history-thumbnail">
+                            <img src="${item.queryImage}" alt="Query image" onerror="this.src='https://images.unsplash.com/photo-1554080353-a576cf803bda?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                        </div>
+                        <div class="history-content">
+                            <div class="history-header">
+                                <h3 class="history-title">${item.metadata.name || 'Tìm kiếm hình ảnh'}</h3>
+                                <span class="history-date">${this.formatDate(item.timestamp)}</span>
+                            </div>
+                            <div class="history-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-images"></i>
+                                    <span>${item.totalResults} kết quả</span>
+                                </div>
+                                <div class="meta-item">       
+                                    <i class="fas fa-bullseye"></i>
+                                    <span>Độ chính xác: ${item.accuracy.toFixed(1)}%</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${this.formatTime(item.timestamp)}</span>
+                                </div>
+                            </div>
+                            <div class="history-preview">
+                                ${item.results.slice(0, 4).map((result, index) => `
+                                    <div class="preview-thumb" onclick="viewResultDetail(${item.id}, ${index})">
+                                        <img src="${result.image_url || 'https://images.unsplash.com/photo-1554080353-a576cf803bda?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'}" 
+                                             alt="Result ${index + 1}">
+                                    </div>
+                                `).join('')}
+                                ${item.results.length > 4 ? `
+                                    <div class="preview-thumb" onclick="viewResultDetail(${item.id})">
+                                        <div style="background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
+                                            +${item.results.length - 4}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="history-actions">
+                                <button class="action-btn btn-view" onclick="viewSearchResult(${item.id})">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </button>
+                                <button class="action-btn btn-delete" onclick="historyManager.deleteHistoryItem(${item.id})">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                this.renderPagination(totalPages);
+            }
+
+            // Render pagination
+            renderPagination(totalPages) {
+                const container = document.getElementById('pagination');
+                container.innerHTML = '';
+
+                if (totalPages <= 1) return;
+
+                // Previous button
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevBtn.disabled = this.currentPage === 1;
+                prevBtn.onclick = () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderHistory();
+                    }
+                };
+                container.appendChild(prevBtn);
+
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `page-btn ${i === this.currentPage ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => {
+                        this.currentPage = i;
+                        this.renderHistory();
+                    };
+                    container.appendChild(pageBtn);
+                }
+
+                // Next button
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'page-btn';
+                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextBtn.disabled = this.currentPage === totalPages;
+                nextBtn.onclick = () => {
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.renderHistory();
+                    }
+                };
+                container.appendChild(nextBtn);
+            }
+
+            // Format date
+            formatDate(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            // Format time
+            formatTime(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // Initialize History Manager
+        const historyManager = new HistoryManager();
+
+        // Global functions for button actions
+        function viewSearchResult(historyId) {
+            const historyItem = historyManager.history.find(item => item.id === historyId);
+            if (historyItem) {
+                // Chuyển đến trang model với dữ liệu đã lưu
+                localStorage.setItem('viewHistoryItem', JSON.stringify(historyItem));
+                window.location.href = `model.html?history=${historyId}`;
+            }
+        }
+
+        function viewResultDetail(historyId, resultIndex = 0) {
+            const historyItem = historyManager.history.find(item => item.id === historyId);
+            if (historyItem && historyItem.results[resultIndex]) {
+                const result = historyItem.results[resultIndex];
+                window.open(result.image_url, '_blank');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update stats
+            historyManager.updateStats();
+            historyManager.renderHistory();
+
+            // Search functionality
+            document.getElementById('searchHistory').addEventListener('input', function(e) {
+                historyManager.searchTerm = e.target.value;
+                historyManager.currentPage = 1;
+                historyManager.renderHistory();
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    historyManager.currentFilter = this.dataset.filter;
+                    historyManager.currentPage = 1;
+                    historyManager.renderHistory();
+                });
+            });
+
+            // Clear all history
+            document.getElementById('clearAllHistory').addEventListener('click', function() {
+                historyManager.clearAllHistory();
+            });
+
+            // Add sample data for demonstration (remove in production)
+            if (historyManager.history.length === 0) {
+                setTimeout(() => {
+                    historyManager.saveSearchResult(
+                        'https://images.unsplash.com/photo-1554080353-a576cf803bda?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                        Array.from({length: 8}, (_, i) => ({
+                            image_url: `https://images.unsplash.com/photo-1554080353-a576cf803bda?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80&v=${i}`,
+                            score: (0.9 - i * 0.1).toFixed(3)
+                        })),
+                        {
+                            name: 'Phong cảnh thiên nhiên',
+                            intro: 'Tìm kiếm các hình ảnh phong cảnh thiên nhiên đẹp'
+                        }
+                    );
+                    historyManager.renderHistory();
+                }, 1000);
+            }
+        });
+
+        // Function to be called from model page when saving results
+        function saveToHistory(queryImage, results, metadata) {
+            historyManager.saveSearchResult(queryImage, results, metadata);
+        }
+    </script>
+    <script src="Layout/layout.js"></script>
+</body>
+</html>

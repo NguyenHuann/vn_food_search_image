@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Image search</title>
+</head>
+<body>
+    <div id="header"></div>
+    <div class="wrapper">
+                <!--Middle-->
+    <main>
+        <section class="container">
+            <div class="head-content">
+                <h2>Nghiên cứu & Khám phá & Thử nghiệm <span class="hightlight">AI Image Models</span></h2>
+                <p>Nền tảng tra cứu ảnh dựa trên nội dung (CBIR- Content based image retrieval)</p>
+            </div>
+        </section>
+    </main>
+    <main>
+        <section class="description">
+            <h2>Tra Cứu Ảnh (Image Search) là gì?</h2>
+            <p><strong>Tra cứu ảnh</strong> là kỹ thuật tìm kiếm thông tin bằng cách sử dụng <strong>hình ảnh</strong> thay vì từ khóa văn bản. Người dùng có thể tìm kiếm theo hai cách chính: <strong>tải ảnh lên</strong> để tìm các ảnh tương tự hoặc nhập <strong>từ khóa</strong> để tìm các hình ảnh liên quan.</p>
+            
+            <h2>Cơ chế hoạt động</h2>
+            <ul>
+                <li><strong>Phân tích</strong>: Hệ thống sử dụng thuật toán <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">thị giác máy tính</a> để phân tích các đặc điểm của hình ảnh như màu sắc, đối tượng, và kết cấu.</li>
+                <li><strong>Chỉ mục hóa</strong>: Mỗi hình ảnh được gán một "dấu vân tay" kỹ thuật số (vector đặc trưng) để dễ dàng so sánh.</li>
+                <li><strong>So sánh</strong>: Khi có yêu cầu, hệ thống sẽ so sánh vector đặc trưng của ảnh đầu vào với hàng tỷ vector đã được lưu trữ để tìm ra kết quả tương đồng nhất.</li>
+            </ul>
+            
+            <h2>Ứng dụng phổ biến</h2>
+            <ul>
+                <li><strong>Tìm nguồn gốc</strong>: Xác định nguồn gốc của một bức ảnh trên mạng.</li>
+                <li><strong>Mua sắm</strong>: Tìm kiếm sản phẩm tương tự từ một bức ảnh.</li>
+                <li><strong>Học tập</strong>: Nhận diện thực vật, kiến trúc, hoặc các đối tượng không rõ tên.</li>
+            </ul>
+        </section>
+        <section class="sidebar-container">
+            <div class="slides">
+                <img src="images/AI1.jpg" alt="Ảnh 1">
+            </div>
+            <div class="slides">
+                <img src="images/AI2.jpg" alt="Ảnh 2">
+            </div>
+            <div class="slides">
+                <img src="images/AI3.jpg" alt="Ảnh 3">
+            </div>
+            <div class="slide-btns">
+                <div class="slide-btn" onclick="plusSlides(-1)">&#10094;</div>
+                <div class="slide-btn" onclick="plusSlides(1)">&#10095;</div>
+            </div>
+            <div class="dots">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+            </div>
+        </section>
+    </main>
+    <main>
+        <section class="aim">
+            <h2>Mục Tiêu của Image Search</h2>
+            <p>Mục tiêu cốt lõi của công nghệ tra cứu ảnh là giúp người dùng tìm kiếm thông tin một cách trực quan, nhanh chóng và hiệu quả hơn. Thay vì chỉ dựa vào văn bản, công cụ này cho phép giải quyết các vấn đề sau:</p>
+            
+            <ol>
+                <li>
+                    <strong>Định danh và Nhận dạng:</strong>
+                    <p>Giúp người dùng nhận diện các đối tượng, địa điểm, hoặc sản phẩm mà họ không biết tên. Ví dụ: Chụp ảnh một loài hoa lạ để tìm tên và thông tin về nó.</p>
+                </li>
+                <li>
+                    <strong>Tìm kiếm nguồn gốc:</strong>
+                    <p>Xác định nguồn gốc của một bức ảnh, giúp kiểm tra tính xác thực, phát hiện ảnh giả mạo hoặc tìm kiếm phiên bản gốc có độ phân giải cao hơn. </p>
+                </li>
+                <li>
+                    <strong>Hỗ trợ mua sắm:</strong>
+                    <p>Cho phép người dùng chụp ảnh một món đồ yêu thích (quần áo, đồ nội thất) và tìm kiếm các sản phẩm tương tự hoặc cùng loại để mua sắm trực tuyến.</p>
+                </li>
+                <li>
+                    <strong>Tìm kiếm trực quan liên quan:</strong>
+                    <p>Khám phá các hình ảnh có phong cách, màu sắc hoặc chủ đề tương tự, phục vụ cho mục đích sáng tạo, thiết kế hoặc tìm cảm hứng.</p>
+                </li>
+            </ol>
+        </section>
+        <section class="benifit">
+            <h2>Lợi Ích của Tra Cứu Ảnh (Image Search)</h2>
+            <p>Công nghệ tra cứu ảnh mang lại nhiều lợi ích đáng kể, giúp việc tìm kiếm thông tin trở nên nhanh chóng, trực quan và hiệu quả hơn.</p>
+
+            <ul>
+                <li>
+                    <strong>Tiết kiệm thời gian và công sức:</strong>
+                    <p>Thay vì mô tả bằng văn bản, bạn có thể tải lên một bức ảnh để tìm kiếm thông tin về sản phẩm, địa điểm hoặc thực vật. Điều này đặc biệt hữu ích khi bạn không biết tên chính xác của vật thể cần tìm.</p>
+                </li>
+                <li>
+                    <strong>Mua sắm thông minh:</strong>
+                    <p>Tra cứu ảnh giúp bạn tìm kiếm các sản phẩm tương tự từ một bức ảnh. Bạn có thể dễ dàng so sánh giá cả và lựa chọn nơi mua sắm tốt nhất.</p>
+                </li>
+                <li>
+                    <strong>Xác thực và phát hiện thông tin:</strong>
+                    <p>Công cụ này cho phép bạn tìm nguồn gốc của một bức ảnh, giúp kiểm tra tính xác thực, phát hiện ảnh đã qua chỉnh sửa hoặc tìm phiên bản gốc. 
+
+    [Image of a magnifying glass over an image]
+    </p>
+                </li>
+                <li>
+                    <strong>Hỗ trợ học tập và nghiên cứu:</strong>
+                    <p>Sinh viên và nhà nghiên cứu có thể sử dụng hình ảnh để tìm kiếm các tài liệu, bài báo hoặc thông tin chuyên sâu về một chủ đề cụ thể một cách trực quan.</p>
+                </li>
+            </ul>
+        </section>
+    </main>
+    <div id="footer"></div>
+    <script src="script.js"></script>
+    <script src="Layout/layout.js"></script>
+    </div>
+</body>
+</html>

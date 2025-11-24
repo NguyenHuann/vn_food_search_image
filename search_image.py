@@ -1,6 +1,6 @@
-import os
 import io
 import json
+import os
 import pickle
 from pathlib import Path
 
@@ -83,7 +83,10 @@ def lookup_dish_meta(rel_path: str) -> dict:
     }
 
 
-# API
+# Ngưỡng khoảng cách: nếu ảnh gần nhất > THRESHOLD thì coi như không match
+THRESHOLD = 0.9
+
+
 @app.route("/search", methods=["POST"])
 def search():
     if "image" not in request.files:
@@ -101,15 +104,58 @@ def search():
 
     try:
         query_vector = extract_vector(img_bytes)
+
         # Euclidean distance
         distances = np.linalg.norm(vectors - query_vector, axis=1)
+
+        if distances.size == 0:
+            # Không có vector nào trong DB
+            return jsonify(
+                {
+                    "meta": None,
+                    "results": [],
+                    "message": "Không có dữ liệu trong cơ sở dữ liệu.",
+                }
+            )
+
+        # Lấy index sắp xếp tăng dần theo distance
+        idx_sorted = np.argsort(distances)
+
+        # best distance (nhỏ nhất)
+        best_idx = int(idx_sorted[0])
+        best_dist = float(distances[best_idx])
+
+        # Nếu khoảng cách tốt nhất vẫn > 1.0 => coi như không tìm thấy
+        if best_dist > THRESHOLD:
+            return jsonify(
+                {
+                    "meta": None,
+                    "results": [],
+                    "message": f"Không tìm thấy dữ liệu phù hợp (distance > {THRESHOLD}).",
+                }
+            )
+
+        # Ngược lại: trả top K kết quả
         K = 50
-        ids = np.argsort(distances)[:K]
+        ids = idx_sorted[:K]
 
-        results = [{"path": paths[i], "distance": float(distances[i])} for i in ids]
+        results = [
+            {
+                "path": paths[i],
+                "distance": float(distances[i]),
+            }
+            for i in ids
+        ]
 
-        best_meta = lookup_dish_meta(paths[ids[0]]) if len(ids) > 0 else None
-        return jsonify({"meta": best_meta, "results": results})
+        best_meta = lookup_dish_meta(paths[best_idx]) if len(ids) > 0 else None
+
+        return jsonify(
+            {
+                "meta": best_meta,
+                "results": results,
+            }
+        )
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

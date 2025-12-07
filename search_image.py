@@ -16,7 +16,7 @@ from tensorflow.keras.applications.efficientnet import EfficientNetB0, preproces
 from tensorflow.keras.preprocessing import image
 
 # CONFIG
-THRESHOLD = 0.9  # Ngưỡng chấp nhận (càng nhỏ càng khắt khe)
+THRESHOLD = 0.9  # Ngưỡng chấp nhận
 TOP_K = 50  # Số lượng ảnh tối đa để xem xét
 INPUT_SHAPE = (224, 224)
 
@@ -31,7 +31,7 @@ model = EfficientNetB0(
     weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3)
 )
 
-# --- LOAD DATABASE ---
+# LOAD DATABASE
 print(">>> Loading Database (Vectors & Metadata)...")
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -58,7 +58,7 @@ try:
     else:
         print("Warning: metadata.json not found.")
 
-    # [QUAN TRỌNG] Chuẩn hóa L2 cho Database ngay khi load
+    # Chuẩn hóa L2 cho Database ngay khi load
     # Giúp tính toán Euclidean Distance chính xác
     if vectors.size > 0:
         norm_db = np.linalg.norm(vectors, axis=1, keepdims=True)
@@ -73,14 +73,11 @@ except FileNotFoundError as e:
     print("Please make sure vectors.pkl and paths.pkl exist.")
 
 
-# --- HELPER FUNCTIONS ---
+# HELPER FUNCTIONS
 
 
 def process_image_to_vector(img_bytes: bytes) -> np.ndarray:
-    """
-    Đọc bytes, resize, preprocess và trích xuất vector.
-    Sử dụng model(x) thay vì model.predict() để tối ưu tốc độ cho 1 ảnh.
-    """
+    # Đọc bytes, resize, preprocess và trích xuất vector.
     try:
         # Convert RGB để xử lý cả ảnh PNG trong suốt hoặc Grayscale
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
@@ -106,14 +103,8 @@ def process_image_to_vector(img_bytes: bytes) -> np.ndarray:
 
 
 def get_folder_name(path_str: str) -> str:
-    """
-    Lấy tên thư mục chứa ảnh từ đường dẫn.
-    Ví dụ: 'dataset/pho_bo/img1.jpg' -> 'pho_bo'
-    Hỗ trợ cả dấu / và \
-    """
     normalized = path_str.replace("\\", "/")
     parts = normalized.split("/")
-    # Giả sử path lưu trong DB dạng: folder_mon_an/ten_anh.jpg
     return parts[0] if parts else ""
 
 

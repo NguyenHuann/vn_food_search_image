@@ -1,6 +1,6 @@
-/*
-    Chung 
-    */
+/* FILE CSS HOÀN CHỈNH - ĐÃ SỬA LỖI VÀ TỐI ƯU
+*/
+
 :root {
   --primary: #6c63ff;
   --secondary: #ff6b8b;
@@ -9,28 +9,32 @@
   --light: #ffffff;
   --gray: #f2f2f2;
   --text: #333333;
-  --success: #4caf50;
+  --success: #4caf50; /* Màu xanh lá cho món đúng */
   --warning: #ff9800;
   --error: #f44336;
 }
+
 html body {
   height: 100%;
   margin: 0;
   display: flex;
   flex-direction: column;
 }
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
 body {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   color: var(--text);
   min-height: 100vh;
   padding-bottom: 60px;
 }
+
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -51,21 +55,24 @@ header {
   position: relative;
   align-items: center;
 }
+
 header .container {
   display: flex;
-  justify-self: space-between;
+  justify-content: space-between; /* ĐÃ SỬA: justify-self không chạy trong flex */
   align-items: center;
 }
+
 .logo {
   display: flex;
-
   align-items: center;
   gap: 10px;
 }
+
 .logo i {
   font-size: 28px;
   color: var(--accent);
 }
+
 .logo h1 {
   font-size: 30px;
   font-weight: 700;
@@ -73,6 +80,7 @@ header .container {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
 .menu {
   flex: 1;
   display: flex;
@@ -87,16 +95,19 @@ header .container {
   margin: 0;
   padding: 0;
 }
+
 .menu ul li a {
   text-decoration: none;
   color: #333;
   font-weight: bold;
 }
+
 nav ul {
   display: flex;
   list-style: none;
   gap: 30px;
 }
+
 nav a {
   text-decoration: none;
   color: var(--text);
@@ -104,9 +115,11 @@ nav a {
   transition: color 0.3s;
   position: relative;
 }
+
 nav a.active {
   color: var(--error);
 }
+
 nav a.active::after {
   content: "";
   position: absolute;
@@ -117,6 +130,7 @@ nav a.active::after {
   background: linear-gradient(90deg, var(--success), var(--secondary));
   border-radius: 3px;
 }
+
 /*sidebar của index*/
 main {
   display: flex;
@@ -127,17 +141,22 @@ main {
   margin: 0 auto;
   width: 100%;
 }
+
 .head-content {
   padding: 80px 0 40px;
   flex: 1;
 }
+
 .head-content h2 {
   font-size: 2.8rem;
   font-weight: 800;
   margin-bottom: 20px;
   line-height: 1.2;
 }
-.hightlight {
+
+/* ĐÃ SỬA: Hỗ trợ cả class cũ (hightlight) và mới (highlight) */
+.hightlight,
+.highlight {
   background: linear-gradient(90deg, var(--secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -151,6 +170,7 @@ main {
   border-radius: 8px;
   background: #ddd;
 }
+
 /*Mô tả of index*/
 .description {
   flex: 1;
@@ -159,50 +179,60 @@ main {
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
 .description h2 {
   color: #2c3e50;
   border-bottom: 2px solid var(--success);
   padding-bottom: 10px;
   margin-top: 0;
 }
+
 .description p {
   color: #555;
   line-height: 1.5;
 }
+
 .description p,
 ul {
   margin-bottom: 20px;
 }
+
 .description ul {
   list-style-type: none;
   padding-left: 0;
 }
+
 .description li {
   position: relative;
   padding-left: 25px;
   margin-bottom: 10px;
 }
+
 .description li::before {
-  content: "✔️"; /* Dấu tích Unicode */
+  content: "✔️";
   position: absolute;
   left: 0;
   color: #27ae60;
 }
+
 .description a {
   color: #3498db;
   text-decoration: none;
   transition: color 0.3s ease;
 }
+
 .description a:hover {
   color: #2980b9;
   text-decoration: underline;
 }
+
 /*sidebar ảnh of index*/
 .slides {
   display: none;
   width: 100%;
   height: 100%;
 }
+
 .slides img {
   width: 100%;
   height: 100%;
@@ -210,6 +240,7 @@ ul {
   display: block;
   object-fit: cover;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -218,6 +249,7 @@ ul {
     opacity: 1;
   }
 }
+
 .slide-btns {
   position: absolute;
   bottom: 12px;
@@ -225,6 +257,7 @@ ul {
   display: flex;
   gap: 8px;
 }
+
 .slide-btn {
   cursor: pointer;
   width: 40px;
@@ -237,13 +270,15 @@ ul {
   justify-content: center;
   font-size: 22px;
   margin-left: 6px;
-  transition: 0.3;
+  transition: 0.3s; /* Sửa lỗi cú pháp transition */
   user-select: none;
 }
+
 .slide-btn:hover {
   background: rgba(0, 0, 0, 0.08);
   transform: scale(1.1);
 }
+
 .dots {
   text-align: center;
   margin-top: 10px;
@@ -259,10 +294,12 @@ ul {
   cursor: pointer;
   transition: background 0.3s;
 }
+
 .dot.active,
 .dot:hover {
   background: #2563eb;
 }
+
 /*Phần mục tiêu of index */
 .aim {
   max-width: 800px;
@@ -274,6 +311,7 @@ ul {
   font-family: Arial, sans-serif;
   color: #495057;
 }
+
 .aim h2 {
   text-align: center;
   color: var(--accent);
@@ -284,15 +322,18 @@ ul {
   display: inline-block;
   width: 100%;
 }
+
 .aim p {
   font-size: 1.1em;
   text-align: justify;
   margin-bottom: 25px;
 }
+
 .aim ol {
   padding-left: 0;
   list-style: none;
 }
+
 .aim li {
   background-color: #ffffff;
   border-left: 5px solid var(--accent);
@@ -302,22 +343,28 @@ ul {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .aim li:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
 }
+
 .aim li strong {
   font-size: 1.3em;
   color: #0056b3;
   display: block;
   margin-bottom: 10px;
 }
+
 .aim li p {
   margin: 0;
   font-size: 1em;
 }
+
 /* Phần lợi ích of index*/
-.benifit {
+/* ĐÃ SỬA: Hỗ trợ cả class cũ (benifit) và mới (benefit) */
+.benifit,
+.benefit {
   text-align: center;
   color: var(--dark);
   font-size: 2em;
@@ -325,15 +372,21 @@ ul {
   padding-bottom: 5px;
   border-bottom: 3px solid var(--dark);
 }
-.benifit p {
+
+.benifit p,
+.benefit p {
   margin-top: 5px;
   font-size: 0.95em;
 }
-.benifit ul {
+
+.benifit ul,
+.benefit ul {
   list-style: none;
   padding-left: 0;
 }
-.benifit li {
+
+.benifit li,
+.benefit li {
   margin-bottom: 15px;
   background-color: #f1f8e9;
   padding: 15px;
@@ -341,10 +394,14 @@ ul {
   border: 1px solid #c8e6c9;
   transition: background-color 0.3s ease;
 }
-.benifit li:hover {
+
+.benifit li:hover,
+.benefit li:hover {
   background-color: #dcedc8;
 }
-.benifit strong {
+
+.benifit strong,
+.benefit strong {
   color: #1b5e20;
   font-size: 1.1em;
 }
@@ -502,7 +559,7 @@ ul {
   display: block;
 }
 
-/* ===== RESULTS SECTION ===== */
+/* ===== RESULTS SECTION (CẬP NHẬT MỚI) ===== */
 .results-section {
   display: none;
   background: white;
@@ -512,27 +569,13 @@ ul {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* --- KẾT QUẢ MỚI --- */
 .results-group {
-  margin-bottom: 40px;
+  margin-bottom: 0; /* Xóa khoảng cách để các nhóm liền nhau */
 }
 
+/* Ẩn tiêu đề nhóm để hiển thị chung 1 dòng */
 .group-title {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #eee;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.same-title {
-  color: #28a745; /* Màu xanh lá cho kết quả chính xác */
-}
-
-.related-title {
-  color: #fd7e14; /* Màu cam cho kết quả liên quan */
+  display: none;
 }
 
 .filter-options {
@@ -581,18 +624,32 @@ ul {
   gap: 1.5rem;
   margin: 2rem 0;
 }
+
 .tab-content {
   display: none;
 }
-.tab-content {
+
+.tab-content.active {
+  /* Sửa để hiển thị đúng tab active */
   display: block;
 }
+
 .tile {
   background: var(--gray);
   border-radius: 15px;
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
+  /* Mặc định viền trong suốt để khi hover hoặc active không bị nhảy layout */
+  border: 3px solid transparent;
+}
+
+/* === CLASS CHO MÓN ĐÚNG (Thêm vào HTML: class="tile correct-match") === */
+.tile.correct-match {
+  border-color: var(--success); /* Viền màu xanh lá */
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.25); /* Hiệu ứng tỏa sáng */
+  z-index: 2;
+  transform: translateY(-5px); /* Nổi lên một chút */
 }
 
 .tile:hover {
@@ -709,8 +766,8 @@ ul {
   margin-bottom: 0.5rem;
   line-height: 1.5;
 }
-/* Phần lưới pagination đánh số trang*/
 
+/* Phần lưới pagination đánh số trang*/
 .pagination {
   display: flex;
   justify-content: center;
@@ -719,6 +776,7 @@ ul {
   gap: 6px;
   flex-wrap: wrap;
 }
+
 .page-btn {
   background: #f5f5f5;
   border: 1px solid #ddd;
@@ -728,6 +786,7 @@ ul {
   font-size: 14px;
   transition: all 0.2s;
 }
+
 .page-btn:hover:not(:disabled) {
   background: #eee;
 }
@@ -805,8 +864,9 @@ footer {
   color: white;
   padding: 60px 0 20px;
   height: 100%;
-  margin-bottom: -80px; /*?tự kéo mất chân thừa*/
+  margin-bottom: -80px;
 }
+
 .footer-content {
   display: flex;
   grid-template-columns: repeat(auto-fit, minmax(250, 1fr));
@@ -814,16 +874,19 @@ footer {
   margin-bottom: 50px;
   flex-wrap: wrap;
 }
+
 .footer-section {
   flex: 1;
   min-width: 200px;
 }
+
 .footer-section h4 {
   font-size: 1.2rem;
   margin-bottom: 20px;
   position: relative;
   padding-bottom: 10px;
 }
+
 .footer-section h4:after {
   content: "";
   position: absolute;
@@ -833,27 +896,34 @@ footer {
   height: 3px;
   background: linear-gradient(200deg, var(--success), var(--secondary));
 }
+
 .footer-section ul {
   list-style: none;
 }
+
 .footer-section ul li {
   margin-bottom: 10px;
 }
+
 .footer-section ul li a {
   color: #ccc;
   text-decoration: none;
   transition: color 0.3s;
 }
+
 .footer-section ul li a:hover {
   color: var(--accent);
 }
+
 .footer-section .logo {
   margin-bottom: 20px;
 }
+
 .social-links {
   display: flex;
   gap: 15px;
 }
+
 .social-links a {
   display: flex;
   align-items: center;
@@ -867,10 +937,12 @@ footer {
   transition: all 0.3s;
   text-decoration: none;
 }
+
 .social-links a:hover {
   background: linear-gradient(90deg, var(--accent));
   transform: translate(-3px);
 }
+
 .footer-bottom {
   text-align: center;
   padding-top: 70px;
@@ -879,11 +951,13 @@ footer {
   flex-basis: 100%;
   font-size: 25px;
 }
+
 .footer-bottom i {
   color: var(--secondary);
 }
+
 .wrapper {
-  min-height: 100%; /* wrapper bao toàn màn hình */
+  min-height: 100%;
   display: flex;
   flex-direction: column;
 }

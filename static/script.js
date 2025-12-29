@@ -1,3 +1,10 @@
+/*
+    LOGIC SẮP XẾP VÀ HIỂN THỊ CHUNG 1 HÀNG
+    - Gộp same_dish và related.
+    - Sort theo distance tăng dần.
+    - Render chung vào một lưới.
+*/
+
 //===================== index (Slider) =======================//
 let slideIndex = 1;
 let intervalId;
@@ -47,8 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
   startInterval();
 });
 
-// ... (Giữ nguyên phần Slider ở đầu file) ...
-
 //========================================= MAIN LOGIC =========================================//
 
 const DEFAULT_BACKEND = "http://127.0.0.1:5000";
@@ -73,19 +78,18 @@ const elBtnImg = $("#btnImg");
 
 const elTrainingInterface = document.querySelector(".training-interface");
 
-// Containers kết quả mới
-const elSameSection = $("#same-section");
-const elSameGrid = $("#same-results-grid");
-const elRelatedSection = $("#related-section");
-const elRelatedGrid = $("#related-results-grid");
+// CHÚ Ý: Chúng ta chỉ dùng 1 grid duy nhất để chứa tất cả kết quả
+const elMainGrid = $("#related-results-grid");
+// Ẩn section cũ đi để tránh lỗi hiển thị nếu HTML vẫn còn
+if ($("#same-section")) $("#same-section").style.display = "none";
 
 if (elBackend) elBackend.textContent = BASE_URL || "(same origin)";
 let fileBlob = null;
 
-// Pagination state (Chỉ dùng cho danh sách Related)
-let relatedResults = [];
+// Pagination state (Dùng chung cho TẤT CẢ kết quả)
+let allResults = [];
 let currentPage = 1;
-const perPage = 10; // Tăng lên 10 ảnh/trang cho đẹp
+const perPage = 12;
 let maxPages = 1;
 
 const setLoading = (b) => (elLoading.style.display = b ? "flex" : "none");
@@ -109,17 +113,23 @@ elBtnImg.addEventListener("click", function () {
 
 // --- RENDER FUNCTIONS ---
 
-// Hàm tạo thẻ ảnh (Không có Badge)
-function createImageTile(item, index, offset = 0) {
+// Hàm tạo thẻ ảnh
+function createImageTile(item, index) {
   const url = makeImgUrl(item.path);
   const score = Number(item.distance ?? 0).toFixed(3);
 
   const tile = document.createElement("div");
+  // Thêm class cơ bản
   tile.className = "tile";
 
-  // Đã xóa phần badge HTML ở đây
+  // LOGIC QUAN TRỌNG: Nếu là món đúng (isCorrect = true) -> Thêm class để CSS tô viền xanh
+  if (item.isCorrect) {
+    tile.classList.add("correct-match");
+  }
+
   tile.innerHTML = `
     <img alt="result" loading="lazy" src="${url}" />
+    ${item.isCorrect ? '<div class="badge">Chính xác</div>' : ""} 
     <div class="meta">
         <span title="${item.path}">Dist: ${score}</span>
         <a href="${url}" target="_blank" rel="noreferrer">Mở</a>
@@ -139,40 +149,25 @@ function createImageTile(item, index, offset = 0) {
   return tile;
 }
 
-// 1. Render danh sách Same Dish (Render hết 1 lần)
-function renderSameDish(list) {
-  elSameGrid.innerHTML = "";
-  if (!list || list.length === 0) {
-    elSameSection.style.display = "none";
+// Hàm Render chính (Hiển thị trang hiện tại của danh sách đã gộp)
+function renderResultsPage() {
+  elMainGrid.innerHTML = ""; // Xóa nội dung cũ
+
+  if (allResults.length === 0) {
+    elMainGrid.innerHTML =
+      '<div class="no-results">Không tìm thấy kết quả nào.</div>';
     return;
   }
 
-  elSameSection.style.display = "block";
-  list.forEach((item, idx) => {
-    const tile = createImageTile(item, idx);
-    // Thêm viền xanh nhẹ để phân biệt nhóm này
-    tile.style.border = "2px solid #28a745";
-    elSameGrid.appendChild(tile);
-  });
-}
-
-// 2. Render danh sách Related (Có phân trang)
-function renderRelatedPage() {
-  elRelatedGrid.innerHTML = "";
-
-  if (relatedResults.length === 0) {
-    elRelatedGrid.innerHTML =
-      '<div class="no-results">Không có ảnh liên quan nào</div>';
-    return;
-  }
-
+  // Tính toán cắt mảng cho phân trang
   const start = (currentPage - 1) * perPage;
   const end = start + perPage;
-  const pageData = relatedResults.slice(start, end);
+  const pageData = allResults.slice(start, end);
 
+  // Vẽ từng thẻ
   pageData.forEach((item, idx) => {
-    const tile = createImageTile(item, idx, start);
-    elRelatedGrid.appendChild(tile);
+    const tile = createImageTile(item, idx);
+    elMainGrid.appendChild(tile);
   });
 
   renderPagination();
@@ -193,12 +188,12 @@ function renderPagination() {
   prevBtn.addEventListener("click", () => {
     if (currentPage > 1) {
       currentPage--;
-      renderRelatedPage();
+      renderResultsPage();
     }
   });
   container.appendChild(prevBtn);
 
-  // Page Numbers
+  // Page Numbers logic
   const startPage = Math.max(1, currentPage - 2);
   const endPage = Math.min(maxPages, startPage + 4);
 
@@ -208,7 +203,7 @@ function renderPagination() {
     btn.textContent = i;
     btn.addEventListener("click", () => {
       currentPage = i;
-      renderRelatedPage();
+      renderResultsPage();
     });
     container.appendChild(btn);
   }
@@ -221,7 +216,7 @@ function renderPagination() {
   nextBtn.addEventListener("click", () => {
     if (currentPage < maxPages) {
       currentPage++;
-      renderRelatedPage();
+      renderResultsPage();
     }
   });
   container.appendChild(nextBtn);
@@ -288,7 +283,7 @@ elFile.addEventListener("change", () => {
   validateAndEnable(elFile.files?.[0]);
 });
 
-// (Drag & Drop giữ nguyên)
+// Drag & Drop
 ["dragenter", "dragover"].forEach((ev) =>
   elDrop.addEventListener(ev, (e) => {
     e.preventDefault();
@@ -317,8 +312,7 @@ elBtnClear.addEventListener("click", () => {
   elPrevImg.src = "";
   elPrev.style.display = "none";
   elBtnSearch.disabled = true;
-  elSameGrid.innerHTML = "";
-  elRelatedGrid.innerHTML = "";
+  elMainGrid.innerHTML = "";
   document.querySelector(".pagination").innerHTML = "";
   document.getElementById("metaBox").innerHTML = "";
 
@@ -332,7 +326,7 @@ elBtnClear.addEventListener("click", () => {
     ?.scrollIntoView({ behavior: "smooth" });
 });
 
-// --- SEARCH LOGIC ---
+// --- SEARCH LOGIC (PHẦN QUAN TRỌNG NHẤT) ---
 elBtnSearch.addEventListener("click", async () => {
   if (!fileBlob) return;
   setError("");
@@ -361,19 +355,37 @@ elBtnSearch.addEventListener("click", async () => {
     // 1. Render Metadata
     renderMeta(data.meta);
 
-    // 2. Tách dữ liệu
-    const sameList = data.results.same_dish || [];
-    relatedResults = data.results.related || [];
+    // 2. GỘP DỮ LIỆU & ĐÁNH DẤU
+    // - Lấy danh sách same_dish, thêm cờ isCorrect = true
+    const sameList = (data.results.same_dish || []).map((item) => ({
+      ...item,
+      isCorrect: true,
+    }));
 
-    // 3. Render
-    renderSameDish(sameList); // Render hết
+    // - Lấy danh sách related, thêm cờ isCorrect = false
+    const relatedList = (data.results.related || []).map((item) => ({
+      ...item,
+      isCorrect: false,
+    }));
 
-    // Setup pagination cho related
-    maxPages = Math.min(15, Math.ceil(relatedResults.length / perPage));
+    // - Gộp chung lại
+    allResults = [...sameList, ...relatedList];
+
+    // 3. SẮP XẾP
+    // - Sắp xếp theo distance tăng dần (số nhỏ nhất lên đầu)
+    // - Nếu muốn món đúng LUÔN lên đầu bất kể distance, hãy thêm logic ưu tiên item.isCorrect
+    allResults.sort((a, b) => {
+      return parseFloat(a.distance) - parseFloat(b.distance);
+    });
+
+    // Setup pagination
+    maxPages = Math.min(15, Math.ceil(allResults.length / perPage));
     currentPage = 1;
-    renderRelatedPage(); // Render trang 1 của related
 
-    // 4. Chuyển view
+    // 4. RENDER
+    renderResultsPage();
+
+    // 5. Chuyển view
     document.getElementById("training-section").style.display = "none";
     if (elTrainingInterface) elTrainingInterface.style.display = "none";
 

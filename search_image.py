@@ -17,7 +17,7 @@ from tensorflow.keras.preprocessing import image
 
 # CONFIG
 THRESHOLD = 0.9  # Ngưỡng chấp nhận
-TOP_K = 50  # Số lượng ảnh tối đa để xem xét
+TOP_K = 100  # Số lượng ảnh tối đa để xem xét
 INPUT_SHAPE = (224, 224)
 
 # APP SETUP

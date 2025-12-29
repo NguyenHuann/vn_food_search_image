@@ -1,10 +1,3 @@
-/*
-    LOGIC SẮP XẾP VÀ HIỂN THỊ CHUNG 1 HÀNG
-    - Gộp same_dish và related.
-    - Sort theo distance tăng dần.
-    - Render chung vào một lưới.
-*/
-
 //===================== index (Slider) =======================//
 let slideIndex = 1;
 let intervalId;

@@ -15,24 +15,23 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 from tensorflow.keras.applications.efficientnet import EfficientNetB0, preprocess_input
 from tensorflow.keras.preprocessing import image
 
-# --- CONFIG ---
+# config
 THRESHOLD = 0.9
 TOP_K = 100
 INPUT_SHAPE = (224, 224)
 
-# --- APP SETUP ---
-# static_folder='static' nghĩa là mọi file HTML, CSS, JS để trong thư mục static
+# app setup
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# --- LOAD MODEL ---
-print(">>> Loading EfficientNetB0 model...")
+# load model
+print("Loading EfficientNetB0 model...")
 model = EfficientNetB0(
     weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3)
 )
 
-# --- LOAD DATABASE ---
-print(">>> Loading Database...")
+# load dataset
+print("Loading Dataset...")
 BASE_DIR = Path(__file__).resolve().parent
 
 vectors = np.array([])
@@ -52,19 +51,19 @@ try:
         with open(meta_path, "r", encoding="utf-8") as f:
             DISH_METADATA = json.load(f)
 
-    # Chuẩn hóa Database
+    # chuẩn hóa dataset
     if vectors.size > 0:
         norm_db = np.linalg.norm(vectors, axis=1, keepdims=True)
         vectors = vectors / (norm_db + 1e-12)
-        print(f">>> DB Loaded: {len(vectors)} items.")
+        print(f"Dataset Loaded: {len(vectors)} items.")
     else:
-        print(">>> Database is empty.")
+        print("Dataset is empty.")
 
 except Exception as e:
-    print(f"Error loading DB: {e}")
+    print(f"Error loading dataset: {e}")
 
 
-# --- HELPER FUNCTIONS ---
+# helper function
 def process_image_to_vector(img_bytes: bytes) -> np.ndarray:
     try:
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
@@ -98,28 +97,28 @@ def lookup_dish_meta(rel_path: str) -> dict:
     }
 
 
-# --- ROUTES ---
+# routes
 
 
-# 1. Route trang chủ
+# trang chủ
 @app.route("/")
 def home():
     return send_from_directory("static", "index.html")
 
 
-# 2. Route phục vụ CSS, JS, Ảnh trong folder static
+# phục vụ CSS, JS, Ảnh trong folder static
 @app.route("/<path:path>")
 def serve_static(path):
     return send_from_directory("static", path)
 
 
-# 3. Route phục vụ dataset ảnh
+# phục vụ dataset ảnh
 @app.route("/dataset/<path:filename>")
 def serve_dataset_image(filename):
     return send_from_directory(BASE_DIR / "dataset", filename)
 
 
-# 4. API Search
+# API Search
 @app.route("/search", methods=["POST"])
 def search():
     if "image" not in request.files:
@@ -161,9 +160,6 @@ def search():
             path = paths[i]
             dist = float(distances[i])
             folder = get_folder_name(path)
-
-            # Logic: Món nào có cùng folder với Top 1 thì vào Same Dish
-            # Các món còn lại vào Related
             item = {"path": path, "distance": dist, "folder": folder}
             if folder == best_folder:
                 same_dish.append(item)
@@ -181,7 +177,7 @@ def search():
         return jsonify({"error": str(e)}), 500
 
 
-# --- RUN APP ---
+# run app
 if __name__ == "__main__":
     # Hugging Face Spaces mặc định chạy port 7860
     app.run(host="0.0.0.0", port=7860)

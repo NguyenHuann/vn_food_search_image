@@ -9,339 +9,149 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <title>AI Food Search - Image Retrieval</title>
+    
     <style>
-      /* --- GLOBAL LAYOUT --- */
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-        margin: 0;
-        padding-bottom: 50px;
+      /* --- BỔ SUNG CSS CHO SPLIT LAYOUT (CHIA ĐÔI MÀN HÌNH) --- */
+      .split-layout {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
       }
 
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
+      /* Cột trái (Sidebar) */
+      .sidebar-panel {
+        width: 320px;
+        flex-shrink: 0;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+        position: sticky; 
+        top: 20px; /* Trượt theo khi cuộn */
       }
 
-      .section-header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .section-header h3 {
+      .sidebar-title {
+        margin-top: 0;
+        border-bottom: 2px solid #6c63ff;
+        padding-bottom: 10px;
         color: #333;
-        font-size: 2rem;
-        margin-bottom: 10px;
+        font-size: 1.1rem;
       }
 
-      /* --- TRAINING / UPLOAD SECTION --- */
-      .training-section {
-        padding: 40px 0;
-        background: #fff;
-        border-bottom: 1px solid #eee;
-      }
-
-      .upload-zone {
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        padding: 40px;
-        text-align: center;
-        background: #fafafa;
-        cursor: pointer;
-        transition: all 0.3s;
+      .query-image-box {
+        width: 100%;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
         margin-bottom: 20px;
       }
 
-      .upload-zone:hover,
-      .upload-zone.hover {
-        border-color: #6c63ff;
-        background: #f0f0ff;
-      }
-
-      .preview {
-        display: none;
-        margin: 20px auto;
-        max-width: 300px;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .preview img {
+      .query-image-box img {
         width: 100%;
         display: block;
-      }
-
-      .controls-row {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-      }
-
-      .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: 0.2s;
-        background: #e0e0e0;
-        color: #333;
-      }
-
-      .btn.primary {
-        background: #6c63ff;
-        color: white;
-      }
-
-      .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      /* --- RESULTS SECTION --- */
-      #results-section {
-        display: none; /* Ẩn mặc định */
-        padding: 40px 0;
-      }
-
-      .filter-options {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-
-      .filter-btn {
-        padding: 8px 20px;
-        border: 1px solid #6c63ff;
-        background: white;
-        color: #6c63ff;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      .filter-btn.action,
-      .filter-btn:hover {
-        background: #6c63ff;
-        color: white;
-      }
-
-      /* --- GRID KẾT QUẢ --- */
-      .result-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px;
-      }
-
-      .tile {
-        position: relative;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-      }
-
-      .tile:hover {
-        transform: translateY(-5px);
-      }
-
-      .tile img {
-        width: 100%;
-        height: 180px;
         object-fit: cover;
       }
 
-      .tile .meta {
-        padding: 10px;
-        font-size: 0.9rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      /* Cột phải (Kết quả) */
+      .results-panel {
+        flex-grow: 1;
       }
 
-      .tile .meta a {
-        text-decoration: none;
-        color: #6c63ff;
-        font-weight: bold;
-      }
-
-      /* --- BADGE (Nhãn Chính xác/Tương tự) --- */
-      .badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        color: white;
-        font-size: 0.75rem;
-        font-weight: bold;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      }
-
-      /* --- TAB CONTENT --- */
-      .tab-content {
-        display: none;
-        animation: fadeIn 0.3s;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      /* --- INFO/METADATA TAB --- */
-      .metaCard {
-        background: #6c63ff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      }
-
-      .metaTitle {
-        color: #ffffff;
-        margin-top: 0;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 10px;
-      }
-
-      .metaCols {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        margin-top: 20px;
-      }
-
+      /* Responsive cho Mobile */
       @media (max-width: 768px) {
-        .metaCols {
-          grid-template-columns: 1fr;
+        .split-layout {
+          flex-direction: column;
+        }
+        .sidebar-panel {
+          width: 100%;
+          position: relative;
+          top: 0;
         }
       }
 
-      /* --- PAGINATION --- */
-      .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 30px;
-        flex-wrap: wrap;
+      /* CSS cho Metadata thu gọn trong Sidebar */
+      .meta-compact h2.metaTitle {
+        font-size: 1.3rem;
+        color: #6c63ff;
+        margin: 10px 0;
+        border-bottom: 1px dashed #ccc;
       }
-
-      .page-btn {
-        width: 36px;
-        height: 36px;
-        border: 1px solid #ddd;
-        background: white;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
+      .meta-compact h3 {
+        font-size: 1rem;
+        margin: 15px 0 5px 0;
+        color: #444;
+        font-weight: 600;
+      }
+      .meta-compact ul, .meta-compact ol {
+        padding-left: 20px;
+        margin: 0;
+        font-size: 0.95rem;
         color: #555;
       }
-
-      .page-btn.active {
-        background: #6c63ff;
-        color: white;
-        border-color: #6c63ff;
+      .meta-step-scroll {
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 5px;
       }
-
-      .page-btn:hover:not(.active):not(:disabled) {
-        background: #f0f0f0;
-        border-color: #ccc;
-      }
-
-      .page-btn:disabled {
-        opacity: 0.3;
-        cursor: default;
-      }
-
-      /* --- LOADING --- */
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.8);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        flex-direction: column;
-      }
-
-      .loading-overlay .card {
-        background: white;
-        padding: 20px 40px;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      /* Custom scrollbar nhỏ */
+      .meta-step-scroll::-webkit-scrollbar { width: 4px; }
+      .meta-step-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+      
+      /* Ẩn input file gốc */
+      input[type="file"] { display: none; }
+      
+      /* Căn chỉnh lại nút bấm trên mobile */
+      .controls-row {
         display: flex;
-        align-items: center;
-        gap: 15px;
-        font-size: 1.2rem;
-      }
-
-      .err {
-        color: #dc3545;
-        text-align: center;
-        margin-top: 10px;
-        font-weight: bold;
-      }
-
-      .back-btn-container {
-        text-align: center;
-        margin: 30px 0;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
       }
     </style>
   </head>
   <body>
     <div id="header"></div>
-
     <main>
       <section class="training-section" id="training-section">
         <div class="container">
           <div class="section-header">
             <h3>Tìm Kiếm Món Ăn Bằng AI</h3>
             <p>
-              Tải lên hình ảnh để hệ thống nhận diện và tìm công thức nấu ăn.
+              Chụp hoặc tải lên hình ảnh để hệ thống nhận diện và tìm công thức nấu ăn.
             </p>
-            <!-- <small class="muted"
-              >Backend: <span id="backend">(đang kết nối...)</span></small
-            > -->
           </div>
 
           <div class="training-interface">
             <div class="upload-zone" id="drop">
               <i
-                class="fas fa-cloud-upload-alt"
+                class="fas fa-utensils"
                 style="font-size: 40px; color: #aaa; margin-bottom: 15px"
               ></i>
-              <p>Kéo và thả hình ảnh vào đây hoặc nhấp để duyệt</p>
-              <input type="file" id="file" accept="image/*" hidden />
+              <p>Chọn phương thức nhập liệu bên dưới</p>
+              
+              <input type="file" id="fileUpload" accept="image/*" />
+              <input type="file" id="fileCamera" accept="image/*" capture="environment" />
             </div>
 
-            <div class="preview" id="preview">
+            <div class="preview" id="preview" style="display: none;">
               <img id="previewImg" alt="Xem trước ảnh đã chọn" />
             </div>
 
             <div class="controls-row">
-              <button class="btn" id="btnPick">
-                <i class="fa-solid fa-folder-open"></i> Chọn ảnh
+              <button class="btn" id="btnCamera">
+                <i class="fas fa-camera"></i> Chụp ảnh
               </button>
+
+              <button class="btn" id="btnUpload">
+                <i class="fas fa-upload"></i> Tải ảnh
+              </button>
+
               <button class="btn primary" id="btnSearch" disabled>
                 <i class="fas fa-search"></i> Tìm kiếm
               </button>
+
               <button class="btn" id="btnClear">
                 <i class="fa-solid fa-rotate-left"></i> Làm mới
               </button>
@@ -352,48 +162,33 @@
         </div>
       </section>
 
-      <section class="results-section" id="results-section">
-        <div class="container">
-          <div class="section-header">
-            <h3>Kết quả phân tích</h3>
+      <section class="results-section" id="results-section" style="display: none;">
+        <div class="container" style="max-width: 1300px;"> <div class="split-layout">
+            <aside class="sidebar-panel">
+              <h4 class="sidebar-title"><i class="fas fa-camera"></i> Ảnh truy vấn</h4>
+              
+              <div class="query-image-box">
+                <img id="queryImgDisplay" src="" alt="Query Image" />
+              </div>
 
-            <div class="filter-options">
-              <button class="filter-btn action" id="btnImg">
-                <i class="fas fa-images"></i> Hình ảnh liên quan
+              <div id="metaBox" class="meta-compact"></div>
+
+              <button class="btn" style="width: 100%; margin-top: 20px; background-color: #f0f0f0;" onclick="window.location.reload()">
+                <i class="fas fa-arrow-left"></i> Tìm ảnh khác
               </button>
-              <button class="filter-btn" id="btnInfo">
-                <i class="fas fa-book-open"></i> Thông tin & Công thức
-              </button>
-            </div>
-          </div>
+            </aside>
 
-          <div class="tab-content active" id="resultsTab">
-            <div class="results-group" id="same-section" style="display: none">
-              <h4 class="group-title same-title">
-                <i class="fas fa-check-circle"></i> Kết quả chính xác (Cùng món)
-              </h4>
-              <div class="result-grid" id="same-results-grid"></div>
-            </div>
+            <main class="results-panel">
+              <div class="section-header" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.5rem;">Kết quả tìm kiếm</h3>
+                <p class="muted" style="margin: 5px 0 0 0; font-size: 0.9rem;">Các hình ảnh tương đồng nhất từ cơ sở dữ liệu</p>
+              </div>
 
-            <div class="results-group" id="related-section">
-              <h4 class="group-title related-title">
-                <i class="fas fa-layer-group"></i> Các ảnh liên quan (Khác món)
-              </h4>
               <div class="result-grid" id="related-results-grid"></div>
-
               <div class="pagination" id="pagination"></div>
-            </div>
+            </main>
           </div>
 
-          <div class="tab-content" id="infoTab">
-            <div id="metaBox" class="metaBox"></div>
-          </div>
-        </div>
-
-        <div class="back-btn-container">
-          <button class="btn" onclick="window.location.reload()">
-            <i class="fas fa-arrow-left"></i> Tìm ảnh khác
-          </button>
         </div>
       </section>
     </main>
@@ -404,7 +199,7 @@
         <span>Đang phân tích hình ảnh...</span>
       </div>
     </div>
-
+    
     <div id="footer"></div>
 
     <script src="script.js"></script>

@@ -7,6 +7,8 @@ function showSlides(n) {
   let slides = document.getElementsByClassName("slides");
   let dots = document.getElementsByClassName("dot");
 
+  if (!slides.length) return; // Bảo vệ nếu không có slider
+
   if (n > slides.length) slideIndex = 1;
   if (n < 1) slideIndex = slides.length;
 
@@ -19,7 +21,7 @@ function showSlides(n) {
 
   if (slides.length > 0) {
     slides[slideIndex - 1].style.display = "block";
-    dots[slideIndex - 1].classList.add("active");
+    if (dots.length > 0) dots[slideIndex - 1].classList.add("active");
   }
 }
 
@@ -43,8 +45,10 @@ function resetInterval() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  showSlides(slideIndex);
-  startInterval();
+  if (document.getElementsByClassName("slides").length > 0) {
+    showSlides(slideIndex);
+    startInterval();
+  }
 });
 
 //========================================= MAIN LOGIC =========================================//
@@ -56,30 +60,30 @@ const BASE_URL = urlParams.get("backend") || DEFAULT_BACKEND;
 // DOM helpers
 const $ = (q) => document.querySelector(q);
 
-const elFile = $("#file");
+// -- CÁC ELEMENT MỚI --
 const elDrop = $("#drop");
 const elPrev = $("#preview");
 const elPrevImg = $("#previewImg");
-const elBtnPick = $("#btnPick");
+
+// Nút bấm mới
+const btnCamera = $("#btnCamera");
+const btnUpload = $("#btnUpload");
+const fileInputCamera = $("#fileCamera");
+const fileInputUpload = $("#fileUpload");
+
 const elBtnSearch = $("#btnSearch");
 const elBtnClear = $("#btnClear");
 const elLoading = $("#loading");
 const elErr = $("#err");
-const elBackend = $("#backend");
-const elBtnInfo = $("#btnInfo");
-const elBtnImg = $("#btnImg");
 
 const elTrainingInterface = document.querySelector(".training-interface");
+const elResultsSection = $("#results-section");
 
-// CHÚ Ý: Chúng ta chỉ dùng 1 grid duy nhất để chứa tất cả kết quả
+// Grid kết quả
 const elMainGrid = $("#related-results-grid");
-// Ẩn section cũ đi để tránh lỗi hiển thị nếu HTML vẫn còn
-if ($("#same-section")) $("#same-section").style.display = "none";
 
-if (elBackend) elBackend.textContent = BASE_URL || "(same origin)";
+// Biến lưu trạng thái
 let fileBlob = null;
-
-// Pagination state (Dùng chung cho TẤT CẢ kết quả)
 let allResults = [];
 let currentPage = 1;
 const perPage = 12;
@@ -89,194 +93,27 @@ const setLoading = (b) => (elLoading.style.display = b ? "flex" : "none");
 const setError = (msg) => (elErr.textContent = msg || "");
 const makeImgUrl = (relPath) => `${BASE_URL}/dataset/${relPath}`;
 
-// --- SỰ KIỆN UI (Tabs) ---
-elBtnInfo.addEventListener("click", function () {
-  document.getElementById("resultsTab").classList.remove("active");
-  document.getElementById("infoTab").classList.add("active");
-  this.classList.add("action");
-  document.getElementById("btnImg").classList.remove("action");
+// --- XỬ LÝ SỰ KIỆN INPUT ẢNH (CAMERA & UPLOAD) ---
+
+// 1. Nút Camera
+btnCamera.addEventListener("click", () => {
+  fileInputCamera.click();
 });
-
-elBtnImg.addEventListener("click", function () {
-  document.getElementById("infoTab").classList.remove("active");
-  document.getElementById("resultsTab").classList.add("active");
-  this.classList.add("action");
-  document.getElementById("btnInfo").classList.remove("action");
-});
-
-// --- RENDER FUNCTIONS ---
-
-// Hàm tạo thẻ ảnh
-function createImageTile(item, index) {
-  const url = makeImgUrl(item.path);
-  const score = Number(item.distance ?? 0).toFixed(3);
-
-  const tile = document.createElement("div");
-  // Thêm class cơ bản
-  tile.className = "tile";
-
-  // LOGIC QUAN TRỌNG: Nếu là món đúng (isCorrect = true) -> Thêm class để CSS tô viền xanh
-  if (item.isCorrect) {
-    tile.classList.add("correct-match");
-  }
-
-  tile.innerHTML = `
-    <img alt="result" loading="lazy" src="${url}" />
-    ${item.isCorrect ? '<div class="badge">Chính xác</div>' : ""} 
-    <div class="meta">
-        <span title="${item.path}">Dist: ${score}</span>
-        <a href="${url}" target="_blank" rel="noreferrer">Mở</a>
-    </div>`;
-
-  const img = tile.querySelector("img");
-  img.addEventListener("error", () => {
-    img.replaceWith(
-      Object.assign(document.createElement("div"), {
-        className: "img-fallback",
-        innerHTML: "Lỗi ảnh",
-        style:
-          "display:flex;align-items:center;justify-content:center;height:180px;background:#eee;color:#777;",
-      })
-    );
-  });
-  return tile;
-}
-
-// Hàm Render chính (Hiển thị trang hiện tại của danh sách đã gộp)
-function renderResultsPage() {
-  elMainGrid.innerHTML = ""; // Xóa nội dung cũ
-
-  if (allResults.length === 0) {
-    elMainGrid.innerHTML =
-      '<div class="no-results">Không tìm thấy kết quả nào.</div>';
-    return;
-  }
-
-  // Tính toán cắt mảng cho phân trang
-  const start = (currentPage - 1) * perPage;
-  const end = start + perPage;
-  const pageData = allResults.slice(start, end);
-
-  // Vẽ từng thẻ
-  pageData.forEach((item, idx) => {
-    const tile = createImageTile(item, idx);
-    elMainGrid.appendChild(tile);
-  });
-
-  renderPagination();
-}
-
-function renderPagination() {
-  const container = document.querySelector(".pagination");
-  if (!container) return;
-  container.innerHTML = "";
-
-  if (maxPages <= 1) return;
-
-  // Prev
-  const prevBtn = document.createElement("button");
-  prevBtn.className = "page-btn";
-  prevBtn.innerHTML = `<i class="fas fa-chevron-left"></i>`;
-  prevBtn.disabled = currentPage === 1;
-  prevBtn.addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderResultsPage();
-    }
-  });
-  container.appendChild(prevBtn);
-
-  // Page Numbers logic
-  const startPage = Math.max(1, currentPage - 2);
-  const endPage = Math.min(maxPages, startPage + 4);
-
-  for (let i = startPage; i <= endPage; i++) {
-    const btn = document.createElement("button");
-    btn.className = "page-btn" + (i === currentPage ? " active" : "");
-    btn.textContent = i;
-    btn.addEventListener("click", () => {
-      currentPage = i;
-      renderResultsPage();
-    });
-    container.appendChild(btn);
-  }
-
-  // Next
-  const nextBtn = document.createElement("button");
-  nextBtn.className = "page-btn";
-  nextBtn.innerHTML = `<i class="fas fa-chevron-right"></i>`;
-  nextBtn.disabled = currentPage === maxPages;
-  nextBtn.addEventListener("click", () => {
-    if (currentPage < maxPages) {
-      currentPage++;
-      renderResultsPage();
-    }
-  });
-  container.appendChild(nextBtn);
-}
-
-function renderMeta(meta) {
-  const box = document.querySelector("#metaBox");
-  if (!box) return;
-
-  if (!meta) {
-    box.innerHTML =
-      '<div class="no-meta">Không tìm thấy thông tin món ăn phù hợp.</div>';
-    return;
-  }
-  const name = meta.name || meta.dish_id || "Món ăn";
-  const intro = meta.intro || "";
-  const ingredients = Array.isArray(meta.ingredients) ? meta.ingredients : [];
-  const step = Array.isArray(meta.step) ? meta.step : [];
-
-  box.innerHTML = `
-      <div class="metaCard">
-        <h2 class="metaTitle">${name}</h2>
-        <p class="metaIntro">${intro}</p>
-        <div class="metaCols">
-          <div>
-            <h3><i class="fas fa-carrot"></i> Nguyên liệu</h3>
-            <ul>${ingredients.map((x) => `<li>${x}</li>`).join("")}</ul>
-          </div>
-          <div>
-            <h3><i class="fas fa-fire"></i> Cách nấu</h3>
-            <ol>${step.map((x) => `<li>${x}</li>`).join("")}</ol>
-          </div>
-        </div>
-      </div>
-    `;
-}
-
-// --- FILE HANDLING ---
-function showPreview(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    elPrevImg.src = e.target.result;
-    elPrev.style.display = "block";
-  };
-  reader.readAsDataURL(file);
-}
-
-function validateAndEnable(file) {
-  if (!file) return;
-  if (!/\.(jpg|jpeg|png|bmp|webp)$/i.test(file.name)) {
-    setError("File ảnh không hợp lệ");
-    fileBlob = null;
-    elBtnSearch.disabled = true;
-    return;
-  }
-  fileBlob = file;
-  showPreview(fileBlob);
-  elBtnSearch.disabled = false;
-}
-
-elBtnPick.addEventListener("click", () => elFile.click());
-elFile.addEventListener("change", () => {
+fileInputCamera.addEventListener("change", (e) => {
   setError("");
-  validateAndEnable(elFile.files?.[0]);
+  validateAndEnable(e.target.files?.[0]);
 });
 
-// Drag & Drop
+// 2. Nút Upload
+btnUpload.addEventListener("click", () => {
+  fileInputUpload.click();
+});
+fileInputUpload.addEventListener("change", (e) => {
+  setError("");
+  validateAndEnable(e.target.files?.[0]);
+});
+
+// 3. Drag & Drop (Kéo thả vào vùng drop)
 ["dragenter", "dragover"].forEach((ev) =>
   elDrop.addEventListener(ev, (e) => {
     e.preventDefault();
@@ -291,35 +128,214 @@ elFile.addEventListener("change", () => {
     elDrop.classList.remove("hover");
   })
 );
-elDrop.addEventListener("click", () => elFile.click());
+// Click vào vùng drop thì mặc định mở upload file
+elDrop.addEventListener("click", () => fileInputUpload.click());
 elDrop.addEventListener("drop", (e) => {
   setError("");
   const f = e.dataTransfer?.files?.[0];
   validateAndEnable(f);
 });
 
+// --- RENDER FUNCTIONS ---
+
+// Hàm tạo thẻ ảnh kết quả
+function createImageTile(item, index) {
+  const url = makeImgUrl(item.path);
+  const score = Number(item.distance ?? 0).toFixed(3);
+
+  const tile = document.createElement("div");
+  tile.className = "tile";
+
+  if (item.isCorrect) {
+    tile.classList.add("correct-match");
+  }
+
+  tile.innerHTML = `
+    <img alt="result" loading="lazy" src="${url}" />
+    ${item.isCorrect ? '<div class="badge">Chính xác</div>' : ""} 
+    <div class="meta">
+        <span title="${item.path}">Dist: ${score}</span>
+        <a href="${url}" target="_blank" rel="noreferrer">Mở</a>
+    </div>`;
+
+  // Xử lý khi ảnh lỗi
+  const img = tile.querySelector("img");
+  img.addEventListener("error", () => {
+    img.replaceWith(
+      Object.assign(document.createElement("div"), {
+        className: "img-fallback",
+        innerHTML: "Lỗi ảnh",
+        style:
+          "display:flex;align-items:center;justify-content:center;height:180px;background:#eee;color:#777;",
+      })
+    );
+  });
+  return tile;
+}
+
+// Render danh sách kết quả (Grid)
+function renderResultsPage() {
+  elMainGrid.innerHTML = "";
+
+  if (allResults.length === 0) {
+    elMainGrid.innerHTML =
+      '<div class="no-results" style="grid-column: 1/-1; text-align:center; padding: 20px;">Không tìm thấy kết quả nào.</div>';
+    return;
+  }
+
+  const start = (currentPage - 1) * perPage;
+  const end = start + perPage;
+  const pageData = allResults.slice(start, end);
+
+  pageData.forEach((item, idx) => {
+    const tile = createImageTile(item, idx);
+    elMainGrid.appendChild(tile);
+  });
+
+  renderPagination();
+}
+
+// Render phân trang
+function renderPagination() {
+  const container = document.querySelector(".pagination");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (maxPages <= 1) return;
+
+  // Nút Prev
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "page-btn";
+  prevBtn.innerHTML = `<i class="fas fa-chevron-left"></i>`;
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderResultsPage();
+      elMainGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  container.appendChild(prevBtn);
+
+  // Các số trang
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(maxPages, startPage + 4);
+
+  for (let i = startPage; i <= endPage; i++) {
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (i === currentPage ? " active" : "");
+    btn.textContent = i;
+    btn.addEventListener("click", () => {
+      currentPage = i;
+      renderResultsPage();
+      elMainGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    container.appendChild(btn);
+  }
+
+  // Nút Next
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "page-btn";
+  nextBtn.innerHTML = `<i class="fas fa-chevron-right"></i>`;
+  nextBtn.disabled = currentPage === maxPages;
+  nextBtn.addEventListener("click", () => {
+    if (currentPage < maxPages) {
+      currentPage++;
+      renderResultsPage();
+      elMainGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  container.appendChild(nextBtn);
+}
+
+// Render Metadata (Giao diện Sidebar Mới)
+function renderMeta(meta) {
+  const box = document.querySelector("#metaBox");
+  if (!box) return;
+
+  if (!meta) {
+    box.innerHTML = '<p class="text-muted">Không có thông tin chi tiết.</p>';
+    return;
+  }
+  const name = meta.name || meta.dish_id || "Món ăn";
+  const ingredients = Array.isArray(meta.ingredients) ? meta.ingredients : [];
+  const steps = Array.isArray(meta.step) ? meta.step : [];
+
+  // Tạo HTML gọn gàng cho Sidebar
+  box.innerHTML = `
+      <h2 class="metaTitle">${name}</h2>
+      
+      <h3><i class="fas fa-carrot"></i> Nguyên liệu:</h3>
+      <ul>
+        ${
+          ingredients.length > 0
+            ? ingredients.map((x) => `<li>${x}</li>`).join("")
+            : "<li>Đang cập nhật...</li>"
+        }
+      </ul>
+      
+      <h3><i class="fas fa-fire"></i> Cách làm:</h3>
+      <div class="meta-step-scroll">
+        <ol>
+          ${
+            steps.length > 0
+              ? steps.map((x) => `<li>${x}</li>`).join("")
+              : "<li>Đang cập nhật...</li>"
+          }
+        </ol>
+      </div>
+    `;
+}
+
+// --- LOGIC XỬ LÝ ẢNH ---
+function showPreview(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    elPrevImg.src = e.target.result;
+    elPrev.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+}
+
+function validateAndEnable(file) {
+  if (!file) return;
+  // Kiểm tra đuôi file
+  if (!/\.(jpg|jpeg|png|bmp|webp)$/i.test(file.name)) {
+    setError("File ảnh không hợp lệ");
+    fileBlob = null;
+    elBtnSearch.disabled = true;
+    return;
+  }
+  fileBlob = file;
+  showPreview(fileBlob);
+  elBtnSearch.disabled = false; // Bật nút tìm kiếm
+}
+
+// Nút Làm mới (Reset)
 elBtnClear.addEventListener("click", () => {
   setError("");
   fileBlob = null;
-  elFile.value = "";
+  fileInputUpload.value = "";
+  fileInputCamera.value = ""; // Reset cả input camera
   elPrevImg.src = "";
   elPrev.style.display = "none";
   elBtnSearch.disabled = true;
+  
+  // Xóa kết quả
   elMainGrid.innerHTML = "";
-  document.querySelector(".pagination").innerHTML = "";
+  document.querySelector("#pagination").innerHTML = "";
   document.getElementById("metaBox").innerHTML = "";
+  document.getElementById("queryImgDisplay").src = ""; // Xóa ảnh sidebar
 
-  // Reset View
+  // Reset View về màn hình Upload
   document.getElementById("training-section").style.display = "block";
-  document.getElementById("results-section").style.display = "none";
+  elResultsSection.style.display = "none";
   if (elTrainingInterface) elTrainingInterface.style.display = "flex";
 
-  document
-    .querySelector(".training-section")
-    ?.scrollIntoView({ behavior: "smooth" });
+  document.querySelector(".training-section")?.scrollIntoView({ behavior: "smooth" });
 });
 
-// --- SEARCH LOGIC (PHẦN QUAN TRỌNG NHẤT) ---
+// --- LOGIC TÌM KIẾM (SEARCH) ---
 elBtnSearch.addEventListener("click", async () => {
   if (!fileBlob) return;
   setError("");
@@ -345,49 +361,45 @@ elBtnSearch.addEventListener("click", async () => {
       throw new Error("Phản hồi không đúng định dạng.");
     }
 
-    // 1. Render Metadata
+    // --- CẬP NHẬT GIAO DIỆN SPLIT VIEW ---
+
+    // 1. Hiển thị ảnh Query sang cột trái (Sidebar)
+    const queryImg = document.getElementById("queryImgDisplay");
+    if (queryImg) queryImg.src = elPrevImg.src;
+
+    // 2. Render Metadata vào cột trái
     renderMeta(data.meta);
 
-    // 2. GỘP DỮ LIỆU & ĐÁNH DẤU
-    // - Lấy danh sách same_dish, thêm cờ isCorrect = true
+    // 3. Xử lý dữ liệu kết quả
     const sameList = (data.results.same_dish || []).map((item) => ({
       ...item,
       isCorrect: true,
     }));
 
-    // - Lấy danh sách related, thêm cờ isCorrect = false
     const relatedList = (data.results.related || []).map((item) => ({
       ...item,
       isCorrect: false,
     }));
 
-    // - Gộp chung lại
     allResults = [...sameList, ...relatedList];
 
-    // 3. SẮP XẾP
-    // - Sắp xếp theo distance tăng dần (số nhỏ nhất lên đầu)
-    // - Nếu muốn món đúng LUÔN lên đầu bất kể distance, hãy thêm logic ưu tiên item.isCorrect
-    allResults.sort((a, b) => {
-      return parseFloat(a.distance) - parseFloat(b.distance);
-    });
+    // Sắp xếp
+    allResults.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
 
-    // Setup pagination
+    // Phân trang
     maxPages = Math.min(15, Math.ceil(allResults.length / perPage));
     currentPage = 1;
 
-    // 4. RENDER
+    // 4. Render Grid
     renderResultsPage();
 
-    // 5. Chuyển view
+    // 5. CHUYỂN VIEW (Ẩn Upload -> Hiện Result)
     document.getElementById("training-section").style.display = "none";
     if (elTrainingInterface) elTrainingInterface.style.display = "none";
 
-    const resSection = document.getElementById("results-section");
-    if (resSection) resSection.style.display = "block";
+    elResultsSection.style.display = "block";
+    elResultsSection.scrollIntoView({ behavior: "smooth" });
 
-    // Focus tab ảnh
-    elBtnImg.click();
-    resSection?.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     console.error(err);
     setError(String(err.message || err));

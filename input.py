@@ -1,11 +1,11 @@
-import os
-import io
 import math
-import requests
-import matplotlib.pyplot as plt
+import os
+
 import matplotlib.image as mpimg
-from matplotlib import gridspec
+import matplotlib.pyplot as plt
+import requests
 from PIL import Image
+from matplotlib import gridspec
 
 #  CẤU HÌNH
 API_URL = "http://localhost:5000/search"
@@ -16,7 +16,7 @@ MAX_COLS = 5  # số cột tối đa trong grid
 
 
 def resolve_local_path(p: str) -> str | None:
-    """Chuẩn hoá & ghép đường dẫn tương đối thành tuyệt đối nếu cần."""
+    # chuẩn hóa đường dẫn
     if not p:
         return None
     p = p.replace("\\", "/")
@@ -54,7 +54,7 @@ def make_meta_text(meta: dict) -> str:
         lines.append("")
     if steps:
         lines.append("Cách nấu:")
-        lines += [f"{i+1}. {s}" for i, s in enumerate(steps)]
+        lines += [f"{i + 1}. {s}" for i, s in enumerate(steps)]
     return "\n".join(lines)
 
 

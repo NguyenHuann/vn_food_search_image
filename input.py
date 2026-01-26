@@ -26,7 +26,7 @@ def resolve_local_path(p: str) -> str | None:
 
 
 def read_local_image(path: str):
-    """Đọc ảnh local an toàn; trả về mảng ảnh hoặc None nếu lỗi."""
+    # đọc ảnh local
     try:
         return mpimg.imread(path)
     except Exception:
@@ -39,7 +39,6 @@ def read_local_image(path: str):
 
 
 def make_meta_text(meta: dict) -> str:
-    """Ghép metadata thành đoạn text đẹp để đưa lên figure."""
     if not meta:
         return "Không có metadata."
     name = meta.get("name") or meta.get("dish_id") or "Món ăn"

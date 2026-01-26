@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //========================================= MAIN LOGIC =========================================//
 
-const DEFAULT_BACKEND = "http://127.0.0.1:5000";
+const DEFAULT_BACKEND = "http://127.0.0.1:7860";
 const urlParams = new URLSearchParams(location.search);
 const BASE_URL = urlParams.get("backend") || DEFAULT_BACKEND;
 

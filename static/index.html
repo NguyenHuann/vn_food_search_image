@@ -1,118 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Image search</title>
-</head>
-<body>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>AI Food Search - Image Retrieval</title>
+  </head>
+  
+  <body>
+    <canvas id="motion-canvas"></canvas>
+
     <div id="header"></div>
-    <div class="wrapper">
-                <!--Middle-->
-    <main>
-        <section class="container">
-            <div class="head-content">
-                <h2>Nghiên cứu & Khám phá & Thử nghiệm <span class="hightlight">AI Image Models</span></h2>
-                <p>Nền tảng tra cứu ảnh dựa trên nội dung (CBIR- Content based image retrieval)</p>
-            </div>
-        </section>
-    </main>
-    <main>
-        <section class="description">
-            <h2>Tra Cứu Ảnh (Image Search) là gì?</h2>
-            <p><strong>Tra cứu ảnh</strong> là kỹ thuật tìm kiếm thông tin bằng cách sử dụng <strong>hình ảnh</strong> thay vì từ khóa văn bản. Người dùng có thể tìm kiếm theo hai cách chính: <strong>tải ảnh lên</strong> để tìm các ảnh tương tự hoặc nhập <strong>từ khóa</strong> để tìm các hình ảnh liên quan.</p>
-            
-            <h2>Cơ chế hoạt động</h2>
-            <ul>
-                <li><strong>Phân tích</strong>: Hệ thống sử dụng thuật toán <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">thị giác máy tính</a> để phân tích các đặc điểm của hình ảnh như màu sắc, đối tượng, và kết cấu.</li>
-                <li><strong>Chỉ mục hóa</strong>: Mỗi hình ảnh được gán một "dấu vân tay" kỹ thuật số (vector đặc trưng) để dễ dàng so sánh.</li>
-                <li><strong>So sánh</strong>: Khi có yêu cầu, hệ thống sẽ so sánh vector đặc trưng của ảnh đầu vào với hàng tỷ vector đã được lưu trữ để tìm ra kết quả tương đồng nhất.</li>
-            </ul>
-            
-            <h2>Ứng dụng phổ biến</h2>
-            <ul>
-                <li><strong>Tìm nguồn gốc</strong>: Xác định nguồn gốc của một bức ảnh trên mạng.</li>
-                <li><strong>Mua sắm</strong>: Tìm kiếm sản phẩm tương tự từ một bức ảnh.</li>
-                <li><strong>Học tập</strong>: Nhận diện thực vật, kiến trúc, hoặc các đối tượng không rõ tên.</li>
-            </ul>
-        </section>
-        <section class="sidebar-container">
-            <div class="slides">
-                <img src="images/AI1.jpg" alt="Ảnh 1">
-            </div>
-            <div class="slides">
-                <img src="images/AI2.jpg" alt="Ảnh 2">
-            </div>
-            <div class="slides">
-                <img src="images/AI3.jpg" alt="Ảnh 3">
-            </div>
-            <div class="slide-btns">
-                <div class="slide-btn" onclick="plusSlides(-1)">&#10094;</div>
-                <div class="slide-btn" onclick="plusSlides(1)">&#10095;</div>
-            </div>
-            <div class="dots">
-                <span class="dot" onclick="currentSlide(1)"></span>
-                <span class="dot" onclick="currentSlide(2)"></span>
-                <span class="dot" onclick="currentSlide(3)"></span>
-            </div>
-        </section>
-    </main>
-    <main>
-        <section class="aim">
-            <h2>Mục Tiêu của Image Search</h2>
-            <p>Mục tiêu cốt lõi của công nghệ tra cứu ảnh là giúp người dùng tìm kiếm thông tin một cách trực quan, nhanh chóng và hiệu quả hơn. Thay vì chỉ dựa vào văn bản, công cụ này cho phép giải quyết các vấn đề sau:</p>
-            
-            <ol>
-                <li>
-                    <strong>Định danh và Nhận dạng:</strong>
-                    <p>Giúp người dùng nhận diện các đối tượng, địa điểm, hoặc sản phẩm mà họ không biết tên. Ví dụ: Chụp ảnh một loài hoa lạ để tìm tên và thông tin về nó.</p>
-                </li>
-                <li>
-                    <strong>Tìm kiếm nguồn gốc:</strong>
-                    <p>Xác định nguồn gốc của một bức ảnh, giúp kiểm tra tính xác thực, phát hiện ảnh giả mạo hoặc tìm kiếm phiên bản gốc có độ phân giải cao hơn. </p>
-                </li>
-                <li>
-                    <strong>Hỗ trợ mua sắm:</strong>
-                    <p>Cho phép người dùng chụp ảnh một món đồ yêu thích (quần áo, đồ nội thất) và tìm kiếm các sản phẩm tương tự hoặc cùng loại để mua sắm trực tuyến.</p>
-                </li>
-                <li>
-                    <strong>Tìm kiếm trực quan liên quan:</strong>
-                    <p>Khám phá các hình ảnh có phong cách, màu sắc hoặc chủ đề tương tự, phục vụ cho mục đích sáng tạo, thiết kế hoặc tìm cảm hứng.</p>
-                </li>
-            </ol>
-        </section>
-        <section class="benifit">
-            <h2>Lợi Ích của Tra Cứu Ảnh (Image Search)</h2>
-            <p>Công nghệ tra cứu ảnh mang lại nhiều lợi ích đáng kể, giúp việc tìm kiếm thông tin trở nên nhanh chóng, trực quan và hiệu quả hơn.</p>
 
-            <ul>
-                <li>
-                    <strong>Tiết kiệm thời gian và công sức:</strong>
-                    <p>Thay vì mô tả bằng văn bản, bạn có thể tải lên một bức ảnh để tìm kiếm thông tin về sản phẩm, địa điểm hoặc thực vật. Điều này đặc biệt hữu ích khi bạn không biết tên chính xác của vật thể cần tìm.</p>
-                </li>
-                <li>
-                    <strong>Mua sắm thông minh:</strong>
-                    <p>Tra cứu ảnh giúp bạn tìm kiếm các sản phẩm tương tự từ một bức ảnh. Bạn có thể dễ dàng so sánh giá cả và lựa chọn nơi mua sắm tốt nhất.</p>
-                </li>
-                <li>
-                    <strong>Xác thực và phát hiện thông tin:</strong>
-                    <p>Công cụ này cho phép bạn tìm nguồn gốc của một bức ảnh, giúp kiểm tra tính xác thực, phát hiện ảnh đã qua chỉnh sửa hoặc tìm phiên bản gốc. 
+    <main>
+      <section class="training-section" id="training-section">
+        <div class="container">
+          <div class="section-header">
+            <h3>Tìm Kiếm Món Ăn Bằng AI</h3>
+            <p>
+              Chụp hoặc tải lên hình ảnh để hệ thống nhận diện và tìm công thức nấu ăn.
+            </p>
+          </div>
 
-    [Image of a magnifying glass over an image]
-    </p>
-                </li>
-                <li>
-                    <strong>Hỗ trợ học tập và nghiên cứu:</strong>
-                    <p>Sinh viên và nhà nghiên cứu có thể sử dụng hình ảnh để tìm kiếm các tài liệu, bài báo hoặc thông tin chuyên sâu về một chủ đề cụ thể một cách trực quan.</p>
-                </li>
-            </ul>
-        </section>
+          <div class="training-interface">
+            <div class="upload-zone" id="drop">
+              <i
+                class="fas fa-utensils"
+                style="font-size: 40px; color: #aaa; margin-bottom: 15px"
+              ></i>
+              <p>Chọn phương thức nhập liệu bên dưới</p>
+              
+              
+            </div>
+            
+            <input type="file" id="fileUpload" accept="image/*" />
+            <input type="file" id="fileCamera" accept="image/*" capture="environment" />
+
+            <div class="preview" id="preview" style="display: none;">
+              <img id="previewImg" alt="Xem trước ảnh đã chọn" />
+            </div>
+
+            <div class="controls-row">
+              <button class="btn" id="btnCamera">
+                <i class="fas fa-camera"></i> Chụp ảnh
+              </button>
+
+              <button class="btn" id="btnUpload">
+                <i class="fas fa-upload"></i> Tải ảnh
+              </button>
+
+              <button class="btn primary" id="btnSearch" disabled>
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
+
+              <button class="btn" id="btnClear">
+                <i class="fa-solid fa-rotate-left"></i> Làm mới
+              </button>
+            </div>
+
+            <div class="err" id="err"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="results-section" id="results-section" style="display: none;">
+        <div class="container" style="max-width: 1300px;"> 
+            <div class="split-layout">
+            
+            <aside class="sidebar-panel">
+              <h4 class="sidebar-title"><i class="fas fa-camera"></i> Ảnh truy vấn</h4>
+              
+              <div class="query-image-box">
+                <img id="queryImgDisplay" src="" alt="Query Image" />
+              </div>
+
+              <div id="metaBox" class="meta-compact">
+                  </div>
+
+              <button class="btn" style="width: 100%; margin-top: 20px; background-color: rgba(255,255,255,0.5);" onclick="window.location.reload()">
+                <i class="fas fa-arrow-left"></i> Tìm ảnh khác
+              </button>
+            </aside>
+
+            <main class="results-panel" style="padding: 0; background: none !important;">
+              <div class="section-header" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.5rem;">Kết quả tìm kiếm</h3>
+                <p class="muted" style="margin: 5px 0 0 0; font-size: 0.9rem;">Các hình ảnh tương đồng nhất từ cơ sở dữ liệu</p>
+              </div>
+
+              <div class="result-grid" id="related-results-grid">
+                  </div>
+              <div class="pagination" id="pagination"></div>
+            </main>
+          </div>
+
+        </div>
+      </section>
     </main>
+
+    <div class="loading-overlay" id="loading">
+      <div class="card">
+        <i class="fa-solid fa-circle-notch fa-spin" style="color: #6c63ff"></i>
+        <span>Đang phân tích hình ảnh...</span>
+      </div>
+    </div>
+  <!-- Camera Modal -->
+    <div id="camera-modal" class="camera-modal" style="display: none;">
+    <div class="camera-box">
+        <video id="video-feed" autoplay playsinline></video>
+        <canvas id="canvas-capture" style="display: none;"></canvas>
+        
+        <div class="camera-controls">
+            <button id="btn-snap" class="btn primary">
+                <i class="fas fa-camera"></i> Chụp ảnh
+            </button>
+            <button id="btn-close-camera" class="btn">
+                <i class="fas fa-times"></i> Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
     <div id="footer"></div>
     <script src="script.js"></script>
     <script src="Layout/layout.js"></script>
-    </div>
-</body>
+  </body>
 </html>

@@ -283,6 +283,8 @@ elCameraModal.addEventListener("click", (e) => {
 
 
 // Hàm xử lý file được chọn
+// Khi bấm btnUpload -> Tự động kích hoạt click cho fileInputUpload (cái đã bị ẩn)
+btnUpload.addEventListener("click", () => fileInputUpload.click());
 function handleFileSelect(file) {
     setError("");
     if (!file) return;

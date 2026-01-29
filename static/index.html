@@ -18,54 +18,61 @@
 
     <main>
       <section class="training-section" id="training-section">
-        <div class="container">
-          <div class="section-header">
-            <h3>Tìm Kiếm Món Ăn Bằng AI</h3>
-            <p>
-              Chụp hoặc tải lên hình ảnh để hệ thống nhận diện và tìm công thức nấu ăn.
-            </p>
-          </div>
+  <div class="container">
+    
+    <div class="hero-card" id="drop">
+      
+      <div class="section-header">
+        <h3 class="main-title">Hệ thống tra cứu món ăn Việt Nam</h3>
+        <h2 class="sub-title">Dựa trên ảnh chụp thực tế</h2>
+        <div class="divider"></div>
+        <p> Chụp hoặc tải ảnh lên trực tiếp để AI nhận diện công thức ngay lập tức.</p>
+      </div>
 
-          <div class="training-interface">
-            <div class="upload-zone" id="drop">
-              <i
-                class="fas fa-utensils"
-                style="font-size: 40px; color: #aaa; margin-bottom: 15px"
-              ></i>
-              <p>Chọn phương thức nhập liệu bên dưới</p>
-              
-              
+      <div class="training-interface no-bg">
+        
+        <div class="big-actions">
+          <button class="action-card" id="btnCamera">
+            <div class="icon-circle"><i class="fas fa-camera"></i></div>
+            <div class="text-group">
+              <span class="action-title">Chụp ảnh</span>
+              <span class="action-desc">Sử dụng Camera</span>
             </div>
-            
-            <input type="file" id="fileUpload" accept="image/*" />
-            <input type="file" id="fileCamera" accept="image/*" capture="environment" />
+          </button>
 
-            <div class="preview" id="preview" style="display: none;">
+          <button class="action-card" id="btnUpload">
+            <div class="icon-circle"><i class="fas fa-upload"></i></div>
+            <div class="text-group">
+              <span class="action-title">Tải ảnh lên</span>
+              <span class="action-desc">Từ thư viện</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="preview-area">
+           <div class="preview" id="preview" style="display: none;">
               <img id="previewImg" alt="Xem trước ảnh đã chọn" />
-            </div>
-
-            <div class="controls-row">
-              <button class="btn" id="btnCamera">
-                <i class="fas fa-camera"></i> Chụp ảnh
+           </div>
+           
+           <div class="search-actions">
+              <button class="btn primary big-search-btn" id="btnSearch" disabled>
+                <i class="fas fa-search"></i> Tìm kiếm ngay
               </button>
-
-              <button class="btn" id="btnUpload">
-                <i class="fas fa-upload"></i> Tải ảnh
-              </button>
-
-              <button class="btn primary" id="btnSearch" disabled>
-                <i class="fas fa-search"></i> Tìm kiếm
-              </button>
-
-              <button class="btn" id="btnClear">
+              
+              <button class="btn secondary" id="btnClear">
                 <i class="fa-solid fa-rotate-left"></i> Làm mới
               </button>
-            </div>
-
-            <div class="err" id="err"></div>
-          </div>
+           </div>
         </div>
-      </section>
+        <div class="err" id="err"></div>
+        <input type="file" id="fileUpload" accept="image/*" />
+        <input type="file" id="fileCamera" accept="image/*" capture="environment" />
+
+      </div>
+    </div>
+
+  </div>
+</section>
 
       <section class="results-section" id="results-section" style="display: none;">
         <div class="container" style="max-width: 1300px;"> 
@@ -108,24 +115,63 @@
         <span>Đang phân tích hình ảnh...</span>
       </div>
     </div>
-  <!-- Camera Modal -->
+    
+    <!--xử lý nút camera-->
     <div id="camera-modal" class="camera-modal" style="display: none;">
-    <div class="camera-box">
-        <video id="video-feed" autoplay playsinline></video>
-        <canvas id="canvas-capture" style="display: none;"></canvas>
-        
-        <div class="camera-controls">
-            <button id="btn-snap" class="btn primary">
-                <i class="fas fa-camera"></i> Chụp ảnh
-            </button>
-            <button id="btn-close-camera" class="btn">
-                <i class="fas fa-times"></i> Đóng
-            </button>
+        <div class="camera-box">
+            <video id="video-feed" autoplay playsinline></video>
+            <canvas id="canvas-capture" style="display: none;"></canvas>
+            
+            <div class="camera-controls">
+                <button id="btn-snap" class="btn primary">
+                    <i class="fas fa-camera"></i> Chụp ảnh
+                </button>
+                <button id="btn-close-camera" class="btn">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-    <div id="footer"></div>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section brand-section">
+                    <div class="logo">
+                        <i class="fas fa-camera-retro"></i>
+                        <h1>Image Search</h1>
+                    </div>
+                    <p class="desc">Nền tảng tìm kiếm ảnh thông minh dựa trên nội dung sử dụng AI.</p>
+                    <div class="social-links">
+                        <a href="https://www.kaggle.com/datasets/nguyenhuann/vietnamese-food-image-dataset" target="_blank"><i class="fab fa-kaggle"></i></a>
+                        <a href="https://github.com/NguyenHuann/vn_food_search_image" target="_blank"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links-section">
+                    <h4>Sản phẩm</h4>
+                    <ul>
+                        <li><a href="#">UI Design</a></li>
+                        <li><a href="#">API Docs</a></li>
+                        <li><a href="#">AI Model</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section team-section">
+                    <h4>Thành viên nhóm</h4>
+                    <ul class="team-list">
+                        <li>Nguyễn Tiến Huân</li>
+                        <li>Nguyễn Việt Hoàng</li>
+                        <li>Lê Tiến Quân</li>
+                        <li>Nguyễn Thúy Hiền</li>
+                        <li>Phạm Ngọc Thành</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Image_Search. Made with <i class="fas fa-heart pulse"></i> by My Group</p>
+            </div>
+        </div>
+    </footer>
+
     <script src="script.js"></script>
     <script src="Layout/layout.js"></script>
   </body>

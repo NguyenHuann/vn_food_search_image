@@ -22,7 +22,7 @@ from transformers import ViTImageProcessor, ViTModel
 
 # config
 SIMILARITY_THRESHOLD = 0.9
-TOP_K = 10
+TOP_K = 100
 INPUT_SHAPE_CNN = (224, 224)
 
 app = Flask(__name__, static_folder="static")

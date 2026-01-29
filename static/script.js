@@ -210,7 +210,10 @@ async function startCamera() {
         height: { ideal: 720 },
       },
     });
-    if (elVideo) elVideo.srcObject = videoStream;
+    if (elVideo) {
+      elVideo.srcObject = videoStream;
+      elVideo.style.transform = "scaleX(-1)";
+    }
   } catch (err) {
     console.error("Camera Error:", err);
     alert("Không thể truy cập Camera. Vui lòng kiểm tra quyền.");

@@ -11,7 +11,7 @@ from matplotlib import gridspec
 API_URL = "http://localhost:5000/search"
 QUERY_IMAGE = "testimage/banh_beo/9.jpg"  # ảnh query
 DATASET_ROOT = "./dataset"  # gốc dataset để resolve path tương đối
-TOP_K = 10  # số ảnh kết quả muốn hiển thị (None = tất cả)
+TOP_K = 50  # số ảnh kết quả muốn hiển thị (None = tất cả)
 MAX_COLS = 5  # số cột tối đa trong grid
 
 

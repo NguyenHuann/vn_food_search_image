@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>AI Food Search - Image Retrieval</title>
+  </head>
+  
+  <body>
+    <canvas id="motion-canvas"></canvas>
+
+    <div id="header"></div>
+
+    <main>
+      <section class="training-section" id="training-section">
+        <div class="container">
+          <div class="section-header">
+            <h3>Tìm Kiếm Món Ăn Bằng AI</h3>
+            <p>
+              Chụp hoặc tải lên hình ảnh để hệ thống nhận diện và tìm công thức nấu ăn.
+            </p>
+          </div>
+
+          <div class="training-interface">
+            <div class="upload-zone" id="drop">
+              <i
+                class="fas fa-utensils"
+                style="font-size: 40px; color: #aaa; margin-bottom: 15px"
+              ></i>
+              <p>Chọn phương thức nhập liệu bên dưới</p>
+            </div>
+            
+            <input type="file" id="fileUpload" accept="image/*" />
+            <input type="file" id="fileCamera" accept="image/*" capture="environment" />
+
+            <div class="preview" id="preview" style="display: none;">
+              <img id="previewImg" alt="Xem trước ảnh đã chọn" />
+            </div>
+
+            <div class="controls-row">
+              <button class="btn" id="btnCamera">
+                <i class="fas fa-camera"></i> Chụp ảnh
+              </button>
+
+              <button class="btn" id="btnUpload">
+                <i class="fas fa-upload"></i> Tải ảnh
+              </button>
+
+              <button class="btn primary" id="btnSearch" disabled>
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
+
+              <button class="btn" id="btnClear">
+                <i class="fa-solid fa-rotate-left"></i> Làm mới
+              </button>
+            </div>
+
+            <div class="err" id="err"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="results-section" id="results-section" style="display: none;">
+        <div class="container" style="max-width: 1300px;"> 
+            <div class="split-layout">
+            
+            <aside class="sidebar-panel">
+              <h4 class="sidebar-title"><i class="fas fa-camera"></i> Ảnh truy vấn</h4>
+              
+              <div class="query-image-box">
+                <img id="queryImgDisplay" src="" alt="Query Image" />
+              </div>
+
+              <div id="metaBox" class="meta-compact">
+                  </div>
+
+              <button class="btn" style="width: 100%; margin-top: 20px; background-color: rgba(255,255,255,0.5);" onclick="window.location.reload()">
+                <i class="fas fa-arrow-left"></i> Tìm ảnh khác
+              </button>
+            </aside>
+
+            <main class="results-panel" style="padding: 0; background: none !important;">
+              <div class="section-header" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.5rem;">Kết quả tìm kiếm</h3>
+                <p class="muted" style="margin: 5px 0 0 0; font-size: 0.9rem;">Các hình ảnh tương đồng nhất từ cơ sở dữ liệu</p>
+              </div>
+
+              <div class="result-grid" id="related-results-grid">
+                  </div>
+              <div class="pagination" id="pagination"></div>
+            </main>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <div class="loading-overlay" id="loading">
+      <div class="card">
+        <i class="fa-solid fa-circle-notch fa-spin" style="color: #6c63ff"></i>
+        <span>Đang phân tích hình ảnh...</span>
+      </div>
+    </div>
+
+    <div id="camera-modal" class="camera-modal" style="display: none;">
+        <div class="camera-box">
+            <video id="video-feed" autoplay playsinline></video>
+            <canvas id="canvas-capture" style="display: none;"></canvas>
+            
+            <div class="camera-controls">
+                <button id="btn-snap" class="btn primary">
+                    <i class="fas fa-camera"></i> Chụp ảnh
+                </button>
+                <button id="btn-close-camera" class="btn">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section brand-section">
+                    <div class="logo">
+                        <i class="fas fa-camera-retro"></i>
+                        <h1>Image Search</h1>
+                    </div>
+                    <p class="desc">Nền tảng tìm kiếm ảnh thông minh dựa trên nội dung sử dụng AI.</p>
+                    <div class="social-links">
+                        <a href="https://www.kaggle.com/datasets/nguyenhuann/vietnamese-food-image-dataset" target="_blank"><i class="fab fa-kaggle"></i></a>
+                        <a href="https://github.com/NguyenHuann/vn_food_search_image" target="_blank"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links-section">
+                    <h4>Sản phẩm</h4>
+                    <ul>
+                        <li><a href="#">UI Design</a></li>
+                        <li><a href="#">API Docs</a></li>
+                        <li><a href="#">AI Model</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section team-section">
+                    <h4>Thành viên nhóm</h4>
+                    <ul class="team-list">
+                        <li>Nguyễn Tiến Huân</li>
+                        <li>Nguyễn Việt Hoàng</li>
+                        <li>Lê Tiến Quân</li>
+                        <li>Nguyễn Thúy Hiền</li>
+                        <li>Phạm Ngọc Thành</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Image_Search. Made with <i class="fas fa-heart pulse"></i> by My Group</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="Layout/layout.js"></script>
+  </body>
+</html>

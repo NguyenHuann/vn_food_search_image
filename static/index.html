@@ -3,76 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
     <title>AI Food Search - Image Retrieval</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
-  
-  <body>
-    <canvas id="motion-canvas"></canvas>
 
-    <div id="header"></div>
+  <body class="food-theme">
+    
+    <div id="header"></div> 
 
     <main>
       <section class="training-section" id="training-section">
-  <div class="container">
-    
-    <div class="hero-card" id="drop">
-      
-      <div class="section-header">
-        <h3 class="main-title">Hệ thống tra cứu món ăn Việt Nam</h3>
-        <h2 class="sub-title">Dựa trên ảnh chụp thực tế</h2>
-        <div class="divider"></div>
-        <p> Chụp hoặc tải ảnh lên trực tiếp để AI nhận diện công thức ngay lập tức.</p>
-      </div>
+        <div class="container">
+          
+          <div class="hero-card" id="drop">
+            <canvas id="motion-canvas"></canvas>
 
-      <div class="training-interface no-bg">
-        
-        <div class="big-actions">
-          <button class="action-card" id="btnCamera">
-            <div class="icon-circle"><i class="fas fa-camera"></i></div>
-            <div class="text-group">
-              <span class="action-title">Chụp ảnh</span>
-              <span class="action-desc">Sử dụng Camera</span>
+            <div class="section-header">
+              <h3 class="main-title">Hệ thống tra cứu món ăn Việt Nam</h3>
+              <h2 class="sub-title">Dựa trên ảnh chụp thực tế</h2>
+              <div class="divider"></div>
+              <h4 class="sub-title" style="font-size: 1rem; margin-top: 20px;"> 
+                  Chụp hoặc tải ảnh lên trực tiếp để AI nhận diện công thức ngay lập tức.
+              </h4>
             </div>
-          </button>
 
-          <button class="action-card" id="btnUpload">
-            <div class="icon-circle"><i class="fas fa-upload"></i></div>
-            <div class="text-group">
-              <span class="action-title">Tải ảnh lên</span>
-              <span class="action-desc">Từ thư viện</span>
-            </div>
-          </button>
-        </div>
-
-        <div class="preview-area">
-           <div class="preview" id="preview" style="display: none;">
-              <img id="previewImg" alt="Xem trước ảnh đã chọn" />
-           </div>
-           
-           <div class="search-actions">
-              <button class="btn primary big-search-btn" id="btnSearch" disabled>
-                <i class="fas fa-search"></i> Tìm kiếm ngay
-              </button>
+            <div class="training-interface no-bg">
               
-              <button class="btn secondary" id="btnClear">
-                <i class="fa-solid fa-rotate-left"></i> Làm mới
-              </button>
-           </div>
+              <div class="big-actions">
+                <button class="action-card" id="btnCamera">
+                  <div class="icon-circle"><i class="fas fa-camera"></i></div>
+                  <div class="text-group">
+                    <span class="action-title">Chụp ảnh</span>
+                    <span class="action-desc">Sử dụng Camera</span>
+                  </div>
+                </button>
+
+                <button class="action-card" id="btnUpload">
+                  <div class="icon-circle"><i class="fas fa-upload"></i></div>
+                  <div class="text-group">
+                    <span class="action-title">Tải ảnh lên</span>
+                    <span class="action-desc">Từ thư viện</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="preview-area">
+                 <div class="preview" id="preview" style="display: none;">
+                    <img id="previewImg" alt="Xem trước ảnh đã chọn" />
+                 </div>
+                 
+                 <div class="search-actions">
+                    <button class="btn primary big-search-btn" id="btnSearch" disabled>
+                      <i class="fas fa-search"></i> Tìm kiếm ngay
+                    </button>
+                    
+                    <button class="btn secondary" id="btnClear">
+                      <i class="fa-solid fa-rotate-left"></i> Làm mới
+                    </button>
+                 </div>
+              </div>
+              <div class="err" id="err"></div>
+              <input type="file" id="fileUpload" accept="image/*" />
+              <input type="file" id="fileCamera" accept="image/*" capture="environment" />
+
+            </div>
+          </div>
+
         </div>
-        <div class="err" id="err"></div>
-        <input type="file" id="fileUpload" accept="image/*" />
-        <input type="file" id="fileCamera" accept="image/*" capture="environment" />
-
-      </div>
-    </div>
-
-  </div>
-</section>
+      </section>
 
       <section class="results-section" id="results-section" style="display: none;">
         <div class="container" style="max-width: 1300px;"> 
@@ -88,23 +87,40 @@
               <div id="metaBox" class="meta-compact">
                   </div>
 
-              <button class="btn" style="width: 100%; margin-top: 20px; background-color: rgba(255,255,255,0.5);" onclick="window.location.reload()">
+              <button class="btn" style="width: 100%; margin-top: 20px; background-color: rgba(255,255,255,0.2); color: #fff;" onclick="window.location.reload()">
                 <i class="fas fa-arrow-left"></i> Tìm ảnh khác
               </button>
             </aside>
 
             <main class="results-panel" style="padding: 0; background: none !important;">
-              <div class="section-header" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 1.5rem;">Kết quả tìm kiếm</h3>
-                <p class="muted" style="margin: 5px 0 0 0; font-size: 0.9rem;">Các hình ảnh tương đồng nhất từ cơ sở dữ liệu</p>
-              </div>
+                <div class="section-header" style="text-align: left; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                  <h3 style="margin: 0; font-size: 1.5rem; color: #fff;">Kết quả tìm kiếm</h3>
+                  <p class="muted" style="margin: 5px 0 0 0; font-size: 0.9rem; color: #ccc;">Các hình ảnh tương đồng nhất từ cơ sở dữ liệu</p>
+                </div>
 
-              <div class="result-grid" id="related-results-grid">
-                  </div>
-              <div class="pagination" id="pagination"></div>
-            </main>
+                <div class="model-tabs">
+                    <button class="tab-btn active" id="btn-tab-cnn" onclick="switchTab('cnn')">
+                        <i class="fas fa-network-wired"></i> Mô hình CNN
+                    </button>
+                    <button class="tab-btn" id="btn-tab-vit" onclick="switchTab('vit')">
+                        <i class="fas fa-robot"></i> Mô hình ViT
+                    </button>
+                </div>
+
+                <div id="container-cnn" class="result-container-tab">
+                    <div class="result-grid" id="grid-cnn">
+                        </div>
+                    <div class="pagination" id="pagination-cnn"></div>
+                </div>
+
+                <div id="container-vit" class="result-container-tab" style="display: none;">
+                    <div class="result-grid" id="grid-vit">
+                        </div>
+                    <div class="pagination" id="pagination-vit"></div>
+                </div>
+
+              </main>
           </div>
-
         </div>
       </section>
     </main>
@@ -116,7 +132,6 @@
       </div>
     </div>
     
-    <!--xử lý nút camera-->
     <div id="camera-modal" class="camera-modal" style="display: none;">
         <div class="camera-box">
             <video id="video-feed" autoplay playsinline></video>
@@ -133,44 +148,7 @@
         </div>
     </div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section brand-section">
-                    <div class="logo">
-                        <i class="fas fa-camera-retro"></i>
-                        <h1>Image Search</h1>
-                    </div>
-                    <p class="desc">Nền tảng tìm kiếm ảnh thông minh dựa trên nội dung sử dụng AI.</p>
-                    <div class="social-links">
-                        <a href="https://www.kaggle.com/datasets/nguyenhuann/vietnamese-food-image-dataset" target="_blank"><i class="fab fa-kaggle"></i></a>
-                        <a href="https://github.com/NguyenHuann/vn_food_search_image" target="_blank"><i class="fab fa-github"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section links-section">
-                    <h4>Sản phẩm</h4>
-                    <ul>
-                        <li><a href="#">UI Design</a></li>
-                        <li><a href="#">API Docs</a></li>
-                        <li><a href="#">AI Model</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section team-section">
-                    <h4>Thành viên nhóm</h4>
-                    <ul class="team-list">
-                        <li>Nguyễn Tiến Huân</li>
-                        <li>Nguyễn Việt Hoàng</li>
-                        <li>Lê Tiến Quân</li>
-                        <li>Nguyễn Thúy Hiền</li>
-                        <li>Phạm Ngọc Thành</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Image_Search. Made with <i class="fas fa-heart pulse"></i> by My Group</p>
-            </div>
-        </div>
-    </footer>
+    <div id="footer"></div>
 
     <script src="script.js"></script>
     <script src="Layout/layout.js"></script>
